@@ -2,7 +2,7 @@
 #define BPLUS_TREE_H 
 
 #include "../../includes/btree/btree.h"
-#include "../../includes/btree_array_functions/btree_array_functions.h"
+#include "../../includes/bplustree/btree_array_functions.h"
 
 template <class T>
 class BPlusTree
