@@ -2,6 +2,7 @@
 #define MMAP_H 
 
 #include "../../includes/bplustree/mpair.h"
+#include <vector>
 
 template <typename K, typename V>
 class MMap
@@ -11,42 +12,93 @@ public:
     class Iterator{
     public:
         friend class MMap;
-        Iterator(typename map_base::Iterator it);
-        Iterator operator ++(int unused);
-        Iterator operator ++();
-        MPair<K, V> operator *();
-        friend bool operator ==(const Iterator& lhs, const Iterator& rhs);
-        friend bool operator !=(const Iterator& lhs, const Iterator& rhs);
+        Iterator(typename map_base::Iterator it){
+            _it = it; 
+        }
+        Iterator operator ++(int unused){
+            Iterator temp; 
+            return temp; 
+        }
+        Iterator operator ++(){
+            Iterator temp; 
+            return temp; 
+        }
+        MPair<K, V> operator *(){
+            MPair<K,V> someMap; 
+            return someMap; 
+        }
+        friend bool operator ==(const Iterator& lhs, const Iterator& rhs){
+            return true; 
+        }
+        friend bool operator !=(const Iterator& lhs, const Iterator& rhs){
+            return true; 
+        }
 
     private:
         typename map_base::Iterator _it;
     };
 
-    MMap();
+    MMap(){
+
+    }
 
 //  Iterators
-    Iterator begin();
-    Iterator end();
+    Iterator begin(){
+        Iterator temp; 
+        return temp;
+    }
+    Iterator end(){
+        Iterator temp; 
+        return temp;
+    }
 
 //  Capacity
-    int size() const;
-    bool empty() const;
+    int size() const{
+        return 0; 
+    }
+    bool empty() const{
+        return true; 
+    }
 
 //  Element Access
-    const vector<V>& operator[](const K& key) const;
-    vector<V>& operator[](const K& key);
+    const vector<V>& operator[](const K& key) const{
+        vector<V> someVec; 
+        return someVec; 
+    }
+    vector<V>& operator[](const K& key){
+         vector<V> someVec; 
+        return someVec; 
+    }
 
 //  Modifiers
-    void insert(const K& k, const V& v);
-    void erase(const K& key);
-    void clear();
+    void insert(const K& k, const V& v){
+
+    }
+
+    void erase(const K& key){
+
+    }
+    void clear(){
+
+    }
 
 //  Operations:
-    bool contains(const K& key) const ;
-    vector<V> &get(const K& key);
+    bool contains(const K& key) const{
+        return true; 
+    }
 
-    Iterator find(const K& key);
-    int count(const K& key);
+    vector<V> &get(const K& key){
+        vector<V> someVec; 
+        return someVec; 
+    }
+
+    Iterator find(const K& key){
+        Iterator temp; 
+        return temp; 
+    }
+    int count(const K& key){
+        return 0; 
+    }
     // I have not writtent hese yet, but we will need them:
     //    int count(const K& key);
     //    lower_bound
@@ -55,7 +107,9 @@ public:
 
 
 
-    bool is_valid();
+    bool is_valid(){
+        return true;
+    }
 
     friend ostream& operator<<(ostream& outs, const MMap<K, V>& print_me){
         outs<<print_me.mmap<<endl;

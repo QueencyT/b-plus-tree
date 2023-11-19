@@ -6,13 +6,28 @@ struct Pair{
     K key;
     V value;
 
-    Pair(const K& k=K(), const V& v=V());
-    friend ostream& operator <<(ostream& outs, const Pair<K, V>& print_me);
-    friend bool operator ==(const Pair<K, V>& lhs, const Pair<K, V>& rhs);
-    friend bool operator < (const Pair<K, V>& lhs, const Pair<K, V>& rhs);
-    friend bool operator > (const Pair<K, V>& lhs, const Pair<K, V>& rhs);
-    friend bool operator <= (const Pair<K, V>& lhs, const Pair<K, V>& rhs);
-    friend Pair<K, V> operator + (const Pair<K, V>& lhs, const Pair<K, V>& rhs);
+    Pair(const K& k=K(), const V& v=V()){
+        key = k; 
+        value = v; 
+    }
+    friend ostream& operator <<(ostream& outs, const Pair<K, V>& print_me){
+        return outs; 
+    }
+    friend bool operator ==(const Pair<K, V>& lhs, const Pair<K, V>& rhs){
+        return true; 
+    }
+    friend bool operator < (const Pair<K, V>& lhs, const Pair<K, V>& rhs){
+        return true; 
+    }
+    friend bool operator > (const Pair<K, V>& lhs, const Pair<K, V>& rhs){
+        return true; 
+    }
+    friend bool operator <= (const Pair<K, V>& lhs, const Pair<K, V>& rhs){
+        return true; 
+    }
+    friend Pair<K, V> operator + (const Pair<K, V>& lhs, const Pair<K, V>& rhs){
+        return true; 
+    }
 };
 
 #endif 

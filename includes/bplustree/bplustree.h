@@ -394,9 +394,9 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
         cout<<*this<<endl; 
         cout<<"--------------------\n";
         transfer_left(shortIndex); 
-        //cout<<"after steal from right\n";
-        //cout<<*this<<endl; 
-        //cout<<"--------------------\n";
+        cout<<"after steal from right\n";
+        cout<<*this<<endl; 
+        cout<<"--------------------\n";
     }
     else if(STEAL_LEFT){//can steal from left
       //  cout<<"short index: "<<shortIndex<<endl; 
@@ -417,7 +417,6 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
         if(!shortChild->is_leaf())
             ordered_insert(shortChild->data, shortChild->data_count, deleted); 
         returned = merge_with_next_subset(shortIndex); 
-        cout<<"return data: "<<returned->data[0]<<endl; 
         //returned->get_smallest(small); 
        // cout<<"after begin\n";
        // cout<<*this<<endl; 
@@ -507,7 +506,10 @@ void BPlusTree<T>::transfer_left(int index){ //assuming this is rotate left //st
         }
     }
     else{
-        
+        delete_item(right->data, 0, right->data_count, deleted); 
+        ordered_insert(shortChild->data, shortChild->data_count, deleted); 
+        //transferring right data to short
+        insert_item(data, index, data_count, right->data[0]); 
     }
     
 
@@ -632,8 +634,6 @@ void BPlusTree<T>::remove(const T& entry){
     }
 
     loose_remove(entry); 
-    cout<<"after removal: "<<entry<<endl; 
-    cout<<*this<<endl;
     BPlusTree<T>* child = subset[0];  
     if(data_count == 0 && !is_leaf()){//if we ourself is short  
         cout<<"root short\n";
