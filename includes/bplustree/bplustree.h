@@ -110,6 +110,8 @@ public:
 
     bool is_valid();
     string in_order();
+    string pre_order(); 
+    string post_order(); 
 
     Iterator begin(); 
     Iterator end();
@@ -728,6 +730,23 @@ string BPlusTree<T>::in_order(){
     }
     return inOrder; 
 }
+
+
+
+template <typename T>
+string BPlusTree<T>::post_order(){
+    //for now
+    return in_order(); 
+}
+
+
+
+template <typename T>
+string BPlusTree<T>::pre_order(){
+    //for now
+    return in_order();
+}
+
 
 //PRIVATE FUNCTIONS 
 template <typename T>
