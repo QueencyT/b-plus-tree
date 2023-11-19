@@ -91,8 +91,8 @@ public:
     }
 
     vector<V> &get(const K& key){
-        vector<V> someVec = new vector<V>; 
-        return someVec; 
+        vector<V>* someVec = new vector<V>; 
+        return *someVec; 
     }
 
     Iterator find(const K& key){
