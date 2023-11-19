@@ -128,8 +128,8 @@ public:
 
 
     const V& at(const K& key) const{
-        V someObj = new V; 
-        return someObj; 
+        V* someObj = new V; 
+        return *someObj; 
     } 
 
     bool is_valid(){
