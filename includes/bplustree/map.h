@@ -65,18 +65,18 @@ public:
 
 //  Element Access
     V& operator[](const K& key){
-        V someObj = new V; 
-        return someObj; 
+        V* someObj = new V; 
+        return *someObj; 
     }
 
     V& at(const K& key){
-        V someObj = new V; 
-        return someObj; 
+        V* someObj = new V; 
+        return *someObj; 
     }
 
     const V& at(const K& key) const{
-        V someObj = new V; 
-        return someObj; 
+        V* someObj = new V; 
+        return *someObj; 
     }
 
 

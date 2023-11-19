@@ -65,12 +65,12 @@ public:
 
 //  Element Access
     const vector<V>& operator[](const K& key) const{
-        vector<V> someVec = new vector<V>; 
-        return someVec; 
+        vector<V>* someVec = new vector<V>; 
+        return *someVec; 
     }
     vector<V>& operator[](const K& key){
-         vector<V> someVec = new vector<V>; 
-        return someVec; 
+         vector<V>* someVec = new vector<V>; 
+        return *someVec; 
     }
 
 //  Modifiers
