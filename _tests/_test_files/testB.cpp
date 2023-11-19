@@ -82,6 +82,20 @@ bool test_remove(bool debug){
   }
 
   if(debug){
+    cout<<"TEST - REMOVE - SPECIFIC CASE\n"; 
+    int data[] = {176, 289, 317, 346, 412, 466, 483, 494, 513, 592, 644}; 
+    BPlusTree<int> mTree(data, 11); 
+    cout<<"curr tree: "<<endl; 
+    cout<<mTree<<endl; 
+
+
+    cout<<"removing: "<<317<<endl; 
+    mTree.remove(317); 
+    cout<<mTree<<endl; 
+    cout<<"in order: "<<mTree.in_order()<<endl; 
+
+  }
+  if(false){
     cout<<"TEST - REMOVE - COMPLEX CASE\n"; 
     BPlusTree<int> mTree; 
     srand(time(0)); 
@@ -130,11 +144,11 @@ TEST(TEST_STUB, TestStub) {
 }
 
 TEST(TEST_COPY, testCopy){
-  EXPECT_EQ(1, test_copy(true)); 
+  EXPECT_EQ(1, test_copy(false)); 
 }
 
 TEST(TEST_REMOVE, testRemove){
-  EXPECT_EQ(1, test_remove(false));
+  EXPECT_EQ(1, test_remove(true));
 }
 
 

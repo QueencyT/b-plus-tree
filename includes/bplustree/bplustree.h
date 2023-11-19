@@ -386,7 +386,8 @@ void BPlusTree<T>::loose_remove(const T& entry){
             right->loose_remove(entry); 
             fix_shortage(goToIndex + 1); //goToIndex should be short index
         }
-        delete_item(data, goToIndex, data_count, temp); 
+       delete_item(data, goToIndex, data_count, temp); 
+
     }
     else if(is_leaf()){ //leaf and not found
         return;
@@ -408,6 +409,7 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
     BPlusTree<T>* left = nullptr; 
     BPlusTree<T>* right = nullptr; 
     BPlusTree<T>* shortChild = subset[shortIndex]; //data_count should be 0 in this case
+    BPlusTree<T>* returned = nullptr; 
     if(shortIndex != child_count - 1)
         right = subset[shortIndex + 1]; 
     if(shortIndex != 0)
@@ -436,13 +438,15 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
         //cout<<"--------------------\n";
     }
     else if(BEGIN_CASE){//begin case
+        T small; 
         cout<<"before begin\n";
         //cout<<*this<<endl; 
         //cout<<"--------------------\n";
         delete_item(data, 0, data_count, deleted); //delete begin
         if(!shortChild->is_leaf())
             ordered_insert(shortChild->data, shortChild->data_count, deleted); 
-        merge_with_next_subset(shortIndex); 
+        returned = merge_with_next_subset(shortIndex); 
+        //returned->get_smallest(small); 
        // cout<<"after begin\n";
        // cout<<*this<<endl; 
         //cout<<"--------------------\n";
@@ -454,38 +458,57 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
         delete_item(data, shortIndex - 1, data_count, deleted); //delete last //first less than equal
         if(!shortChild->is_leaf()) //if we are not leaf, then isnert to short child, else don't 
             ordered_insert(shortChild->data, shortChild->data_count, deleted);
-        merge_with_next_subset(shortIndex - 1);
+        returned = merge_with_next_subset(shortIndex - 1);
        // cout<<"after other\n";
        // cout<<*this<<endl; 
        // cout<<"--------------------\n";
     }
     //Need to return 
-   // return 
+   return returned; 
 }  //fix shortage in child i
 // and return the smallest key in this subtree
 
 template <typename T>
 BPlusTree<T>* BPlusTree<T>::get_smallest_node(){
-     BPlusTree<T>* temp; 
-    return temp; 
+     if(is_leaf()){
+        return this; 
+    }
+
+    subset[0]->get_smallest_node();  
 }
 
 template <typename T>
 void BPlusTree<T>::get_smallest(T& entry){
-     BPlusTree<T>* temp; 
-    return temp; 
-}      //entry := leftmost leaf
+    //keep going left 
+    if(is_leaf()){
+        entry = data[0]; 
+        return; 
+    }
+
+    subset[0]->get_smallest(entry);  
+}      
+//entry := leftmost leaf
 
 template <typename T>
 void BPlusTree<T>::get_biggest(T& entry){
-     BPlusTree<T>* temp; 
-    return temp; 
+    if(is_leaf()){
+        entry = data[data_count - 1]; 
+        return; 
+    }
+     subset[child_count - 1]->get_biggest(entry); 
 }       //entry := rightmost leaf
 
 template <typename T>
 void BPlusTree<T>::remove_biggest(T& entry){ //hm?
-     BPlusTree<T>* temp; 
-    return temp; 
+     if(!is_leaf()){
+        subset[child_count - 1]->remove_biggest(entry); //go right again
+        if(!is_leaf() && subset[child_count -1]->data_count < MINIMUM){
+            fix_shortage(child_count - 1);
+        }
+    }
+    else{//now we are leaf 
+        delete_item(data, data_count - 1, data_count, entry); //delete right most and put it into entry 
+    }
 }   //remove the biggest child of tree->entry
 
 template <typename T>
@@ -575,7 +598,7 @@ BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int index){
     delete_item(subset, index+1, child_count, deleted);
     delete deleted;
     deleted = nullptr;
-
+    return merging; //returning the short child?
     //needs to return something?
 }//merge subset i with  i+1
 
@@ -691,7 +714,7 @@ void BPlusTree<T>::print_tree(int level, ostream &outs) const{
 
 template <typename T>
 bool BPlusTree<T>::is_valid(){
-
+    return true; 
 }
 
 template <typename T>
