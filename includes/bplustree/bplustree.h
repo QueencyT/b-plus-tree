@@ -507,7 +507,7 @@ void BPlusTree<T>::transfer_left(int index){ //assuming this is rotate left //st
         }
     }
     else{
-
+        
     }
     
 
@@ -596,15 +596,18 @@ void BPlusTree<T>::loose_remove(const T& entry){
         T temp;  
         //deleting breadcrumbs first
         if(!is_leaf()){ //of we are not leaf, we need to go to breadcrumbs and remove
-            cout<<"going for breadcrumsb\n";
+            T small; 
+            /*cout<<"going for breadcrumsb\n";
+            cout<<"returned tree\n"; 
+            cout<<*this<<endl; 
+            cout<<"-----------------------\n";*/
             BPlusTree<T>* right = subset[goToIndex + 1]; 
             right->loose_remove(entry); 
-            BPlusTree<T>* returned = fix_shortage(goToIndex + 1); //goToIndex should be short index
-            cout<<"replacing with: "<<returned->data[0]<<endl; 
-            data[goToIndex] = returned->data[0]; //probs not right --> but temp for now
+            right->get_smallest(small); 
+            data[goToIndex] = small; 
+            fix_shortage(goToIndex + 1);
         }
         else{
-            cout<<"deleting: "<<entry<<endl; 
             delete_item(data, goToIndex, data_count, temp); 
         }
 
