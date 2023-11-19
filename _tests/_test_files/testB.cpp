@@ -40,6 +40,8 @@ bool test_copy(bool debug){
 }
 
 bool test_remove(bool debug){
+  //removing - root case - problem 
+
   if(false){
     cout<<"TEST - MERGING BEGINNING CASE - REMOVE - SIMPLE\n"; 
     int data[] = {180, 200, 120, 190}; 
@@ -70,20 +72,23 @@ bool test_remove(bool debug){
 
   if(false){
     cout<<"TEST - STEAL FROM LEFT CASE - REMOVE - SIMPLE\n"; 
-    int data[] = {180, 119, 120, 121}; 
-    BPlusTree<int> mTree(data, 4); 
+    int data[] = {842, 845,648, 513, 846}; 
+    BPlusTree<int> mTree(data, 5); 
     cout<<"tree before removal: "<<endl; 
+    mTree.remove(846); 
     mTree.print_tree(); 
+    cout<<endl; 
 
-    cout<<"after removing 120\n"; 
-    mTree.remove(120); 
+    cout<<"after removing 842\n"; 
+    mTree.remove(842); 
     cout<<mTree<<endl; 
     cout<<"in order: "<<mTree.in_order()<<endl; 
   }
 
-  if(debug){
+  if(false){
     cout<<"TEST - REMOVE - SPECIFIC CASE\n"; 
     int data[] = {176, 289, 317, 346, 412, 466, 483, 494, 513, 592, 644}; 
+    int data2[] = {318,604,695, 200, 385, 100,150, 950}; 
     BPlusTree<int> mTree(data, 11); 
     cout<<"curr tree: "<<endl; 
     cout<<mTree<<endl; 
@@ -95,7 +100,7 @@ bool test_remove(bool debug){
     cout<<"in order: "<<mTree.in_order()<<endl; 
 
   }
-  if(false){
+  if(true){
     cout<<"TEST - REMOVE - COMPLEX CASE\n"; 
     BPlusTree<int> mTree; 
     srand(time(0)); 
@@ -115,6 +120,7 @@ bool test_remove(bool debug){
         mTree.remove(rando); 
         cout<<mTree<<endl; 
         cout<<"in order: "<<mTree.in_order()<<endl; 
+        cout<<"size: "<<mTree.size()<<endl; 
         cout<<"--------------------------\n"; 
         if(mTree.contains(rando)){
           cout<<"FAILED TO REMOVE: "<<rando<<endl; 

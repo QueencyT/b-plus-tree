@@ -181,7 +181,7 @@ private:
 template <typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::begin(){
     if(is_leaf()){
-        Iterator returnIter(this, 0); 
+        BPlusTree<T>::Iterator returnIter(this, 0); 
         return returnIter; 
     }
    subset[0]->begin(); //go to left most child
@@ -190,23 +190,23 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::begin(){
 
 template <typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::end(){
-    if(is_leaf()){
+   /* if(is_leaf()){
         Iterator returnIter(this, 0); 
         return returnIter; 
     }
-   subset[child_count - 1]->end(); //go to right most child
+   subset[child_count - 1]->end(); //go to right most child*/
+   BPlusTree<T>::Iterator nullIter(nullptr, 0); 
 }
 
 template <typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T& key){
-    BPlusTree<T>* found = find_ptr(key); 
-    Iterator nullIter(nullptr, 0); 
-
-    if(found){
-        int index = first_ge(found->data, data_count, key); 
-        Iterator returnIter(find_ptr(key), index); 
-        return returnIter; 
+    BPlusTree<T>::Iterator nullIter; 
+   for(BPlusTree<T>::Iterator beg = begin(); beg != end(); beg++){
+    if(*beg == key){
+        BPlusTree<T>::Iterator foundIter (beg.it, beg.key_ptr); 
+        return foundIter; 
     }
+   }
 
     return nullIter; 
 }     
@@ -214,7 +214,7 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T& key){
 
 template <typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::lower_bound(const T& key){ //assuming we are trying to find the previous ???
-    Iterator tempIter; 
+    BPlusTree<T>::Iterator tempIter; 
     return tempIter; 
 }
 //return first that goes NOT BEFORE
@@ -374,75 +374,6 @@ void BPlusTree<T>::insert(const T& entry){
 
 
 
-
-template <typename T>
-BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we just removed, 
-    T deleted; 
-    BPlusTree<T>* left = nullptr; 
-    BPlusTree<T>* right = nullptr; 
-    BPlusTree<T>* shortChild = subset[shortIndex]; //data_count should be 0 in this case
-    BPlusTree<T>* returned = nullptr; 
-    if(shortIndex != child_count - 1)
-        right = subset[shortIndex + 1]; 
-    if(shortIndex != 0)
-        left = subset[shortIndex - 1];
-    bool STEAL_RIGHT = (right && right->data_count > MINIMUM), STEAL_LEFT = left && left->data_count > MINIMUM, BEGIN_CASE = (shortIndex == 0); 
-
-    if(STEAL_RIGHT){//can steal from right
-        cout<<"steal right\n"; 
-        cout<<"before steal from right\n";
-        cout<<*this<<endl; 
-        cout<<"--------------------\n";
-        transfer_left(shortIndex); 
-        cout<<"after steal from right\n";
-        cout<<*this<<endl; 
-        cout<<"--------------------\n";
-    }
-    else if(STEAL_LEFT){//can steal from left
-      //  cout<<"short index: "<<shortIndex<<endl; 
-      cout<<"before steal from left\n";
-      // cout<<*this<<endl; 
-       //cout<<"--------------------\n";
-        transfer_right(shortIndex); 
-        //cout<<"after steal from left\n";
-        //cout<<*this<<endl; 
-        //cout<<"--------------------\n";
-    }
-    else if(BEGIN_CASE){//begin case
-        T small; 
-        cout<<"before begin\n";
-        //cout<<*this<<endl; 
-        //cout<<"--------------------\n";
-        delete_item(data, 0, data_count, deleted); //delete begin
-        if(!shortChild->is_leaf())
-            ordered_insert(shortChild->data, shortChild->data_count, deleted); 
-        returned = merge_with_next_subset(shortIndex); 
-        //returned->get_smallest(small); 
-       // cout<<"after begin\n";
-       // cout<<*this<<endl; 
-        //cout<<"--------------------\n";
-    }
-    else{
-        cout<<"before other\n";
-        //cout<<*this<<endl; 
-        //cout<<"--------------------\n";
-        delete_item(data, shortIndex - 1, data_count, deleted); //delete last //first less than equal
-        if(!shortChild->is_leaf()) //if we are not leaf, then isnert to short child, else don't 
-            ordered_insert(shortChild->data, shortChild->data_count, deleted);
-        returned = merge_with_next_subset(shortIndex - 1);
-        //cout<<"return data: "<<returned->data[0]<<endl; 
-       // cout<<"after other\n";
-       // cout<<*this<<endl; 
-       // cout<<"--------------------\n";
-    }
-    //Need to return 
-    if(returned){
-        cout<<"returned data: "<<returned->data[0]<<endl; 
-    }
-   return returned; 
-}  //fix shortage in child i
-// and return the smallest key in this subtree
-
 template <typename T>
 BPlusTree<T>* BPlusTree<T>::get_smallest_node(){
      if(is_leaf()){
@@ -508,37 +439,8 @@ void BPlusTree<T>::transfer_left(int index){ //assuming this is rotate left //st
     else{
         delete_item(right->data, 0, right->data_count, deleted); 
         ordered_insert(shortChild->data, shortChild->data_count, deleted); 
-        //transferring right data to short
-        insert_item(data, index, data_count, right->data[0]); 
+        data[index] = right->data[0]; 
     }
-    
-
-    //steal child 
-    
-
-    /*
-
-    if(!shortChild->is_leaf()){
-        delete_item(data, index, data_count, deleted); //deleting from parent
-        ordered_insert(shortChild->data, shortChild->data_count, deleted); //inserting deleted into short
-    }
-
-    delete_item(right->data, 0,right->data_count, deleted); 
-
-    if(shortChild->is_leaf()){
-        delete_item(right->data, 0, right->data_count, )
-        //ordered_insert(shortChild->data, shortChild->data_count, deleted); 
-        //ordered_insert(data, data_count, right->data[0]);
-    }
-    else{
-        ordered_insert(data, data_count, deleted); 
-    }
-
-    //steal child 
-    if(!right->is_leaf()){
-         delete_item(right->subset, 0, right->child_count, deletedChild); 
-         insert_item(shortChild->subset, shortChild->data_count, shortChild->child_count, deletedChild); //getting from right so should be larger 
-    }*/
 } //transfer one element LEFT from child i
 
 template <typename T>
@@ -548,20 +450,23 @@ void BPlusTree<T>::transfer_right(int index){//assuming this is rotate right //s
     BPlusTree<T>* deletedChild; 
     BPlusTree<T>* shortChild = subset[index]; 
     BPlusTree<T>* left = subset[index - 1];
-    delete_item(data, index - 1, data_count, deleted); //delete from parent, but don't attach to child
-    if(!shortChild->is_leaf()) //must test, only do this for when leaf, or all the time
-        ordered_insert(shortChild->data, shortChild->data_count, deleted);  
-    
-    delete_item(left->data, left->data_count - 1, left->data_count, deleted); //stealing from left
-    ordered_insert(data, data_count, deleted); //inser
 
-    if(!shortChild->is_leaf()) //must test, only do this for when leaf, or all the time
-        ordered_insert(shortChild->data, shortChild->data_count, deleted);  //insert what was deleted from left into shortChild
+    if(!shortChild->is_leaf()){
+        delete_item(data, index - 1, data_count, deleted); //might just do a swap here hmm //was 0 before, what if short index is 0 will never be
+        ordered_insert(shortChild->data, shortChild->data_count, deleted); 
+        delete_item(left->data, left->data_count - 1, left->data_count, deleted); 
+        ordered_insert(data, data_count, deleted); 
 
-    //steal child
-    if(!left->is_leaf()){
-        delete_item(left->subset, left->child_count - 1, left->child_count, deletedChild); //stealing right most child
-        insert_item(shortChild->subset, 0, shortChild->child_count, deletedChild); 
+        //steal child
+        if(!left->is_leaf()){
+            delete_item(left->subset, left->child_count - 1, left->child_count, deletedChild); //stealing right most child
+            insert_item(shortChild->subset, 0, shortChild->child_count, deletedChild); 
+        }
+    }
+    else{
+        delete_item(left->data, left->data_count - 1, left->data_count, deleted); 
+        data[index - 1] = deleted; 
+        ordered_insert(shortChild->data, shortChild->data_count, deleted); 
     }
 } //transfer one element RIGHT from child i
 
@@ -569,9 +474,9 @@ template <typename T>
 BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int index){
     //doesn't seem like I need to update the next ptr
 
-    cout<<"before merged: "<<endl; 
+    /*cout<<"before merged: "<<endl; 
     cout<<*this<<endl;  
-    cout<<"-------------------\n";
+    cout<<"-------------------\n";*/
     BPlusTree<T>* deleted; 
     BPlusTree<T>* merging = subset[index]; 
     BPlusTree<T>* right = subset[index + 1]; 
@@ -580,13 +485,79 @@ BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int index){
     delete_item(subset, index+1, child_count, deleted);
     delete deleted;
     deleted = nullptr;
-    cout<<"after merged: "<<endl; 
+   /* cout<<"after merged: "<<endl; 
     cout<<*this<<endl; 
     cout<<"-------------------\n";
+    */
     return merging; //returning the short child?
     //needs to return something?
 }//merge subset i with  i+1
 
+
+template <typename T>
+BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we just removed, 
+    T deleted; 
+    BPlusTree<T>* left = nullptr; 
+    BPlusTree<T>* right = nullptr; 
+    BPlusTree<T>* shortChild = subset[shortIndex]; //data_count should be 0 in this case
+    BPlusTree<T>* returned = nullptr; 
+    if(shortIndex != child_count - 1)
+        right = subset[shortIndex + 1]; 
+    if(shortIndex != 0)
+        left = subset[shortIndex - 1];
+    bool STEAL_RIGHT = (right && right->data_count > MINIMUM), STEAL_LEFT = left && left->data_count > MINIMUM, BEGIN_CASE = (shortIndex == 0); 
+
+    if(STEAL_RIGHT){//can steal from right
+        cout<<"steal right\n"; 
+        /*cout<<"before steal from right\n";
+        cout<<*this<<endl; 
+        cout<<"--------------------\n";*/
+        transfer_left(shortIndex); 
+        returned = shortChild; 
+        //cout<<*this<<endl;
+       // cout<<"--------------------\n";
+    }
+    else if(STEAL_LEFT){//can steal from left
+      //  cout<<"short index: "<<shortIndex<<endl; 
+      cout<<"before steal from left\n";
+      // cout<<*this<<endl; 
+       //cout<<"--------------------\n";
+        transfer_right(shortIndex); 
+        returned = shortChild; 
+        //cout<<"after steal from left\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+    }
+    else if(BEGIN_CASE){//begin case
+        T small; 
+        cout<<"before begin\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+        delete_item(data, 0, data_count, deleted); //delete begin
+        if(!shortChild->is_leaf())
+            ordered_insert(shortChild->data, shortChild->data_count, deleted); 
+        returned = merge_with_next_subset(shortIndex); 
+        //returned->get_smallest(small); 
+       // cout<<"after begin\n";
+       // cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+    }
+    else{
+        cout<<"before other\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+        delete_item(data, shortIndex - 1, data_count, deleted); //delete last //first less than equal
+        if(!shortChild->is_leaf()) //if we are not leaf, then isnert to short child, else don't 
+            ordered_insert(shortChild->data, shortChild->data_count, deleted);
+        returned = merge_with_next_subset(shortIndex - 1);
+        //cout<<"return data: "<<returned->data[0]<<endl; 
+       // cout<<"after other\n";
+       // cout<<*this<<endl; 
+       // cout<<"--------------------\n";
+    }
+   return returned; 
+}  //fix shortage in child i
+// and return the smallest key in this subtree
 
 
 //remove element functions:
@@ -598,7 +569,7 @@ void BPlusTree<T>::loose_remove(const T& entry){
         T temp;  
         //deleting breadcrumbs first
         if(!is_leaf()){ //of we are not leaf, we need to go to breadcrumbs and remove
-            T small; 
+            T small;  
             /*cout<<"going for breadcrumsb\n";
             cout<<"returned tree\n"; 
             cout<<*this<<endl; 
@@ -607,7 +578,8 @@ void BPlusTree<T>::loose_remove(const T& entry){
             right->loose_remove(entry); 
             right->get_smallest(small); 
             data[goToIndex] = small; 
-            fix_shortage(goToIndex + 1);
+            BPlusTree<T>* returned = fix_shortage(goToIndex + 1);
+            data[goToIndex] = returned->data[0];
         }
         else{
             delete_item(data, goToIndex, data_count, temp); 

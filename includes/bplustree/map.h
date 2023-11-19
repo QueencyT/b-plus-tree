@@ -12,6 +12,9 @@ public:
     class Iterator{
     public:
         friend class Map;
+        Iterator(){
+
+        }
         Iterator(typename map_base::Iterator it){
             _it = it; 
         }
@@ -102,9 +105,21 @@ public:
     }
 
     // I have not writtent hese yet, but we will need them:
-    //    int count(const K& key);
-    //    lower_bound
-    //    upper_bound
+    int count(const K& key){
+        return 0; 
+    }
+    
+    Iterator lower_bound(const K& key){
+        Iterator temp; 
+        return temp; 
+    }
+
+    Iterator upper_bound(const K& key){
+        Iterator temp; 
+        return temp; 
+    }
+
+
     //    equal_range:
 
     bool is_valid(){

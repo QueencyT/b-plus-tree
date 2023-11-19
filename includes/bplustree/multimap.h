@@ -12,6 +12,9 @@ public:
     class Iterator{
     public:
         friend class MMap;
+        Iterator(){
+
+        }
         Iterator(typename map_base::Iterator it){
             _it = it; 
         }
@@ -96,6 +99,8 @@ public:
         Iterator temp; 
         return temp; 
     }
+
+    
     int count(const K& key){
         return 0; 
     }
@@ -105,8 +110,28 @@ public:
     //    upper_bound
     //    equal_range:
 
+    
+    Iterator lower_bound(const K& key){
+        Iterator temp; 
+        return temp; 
+    }
+
+    Iterator upper_bound(const K& key){
+        Iterator temp; 
+        return temp; 
+    }
+
+    
+
+    //    upper_bound
+    //    equal_range:
 
 
+    const V& at(const K& key) const{
+        V someObj; 
+        return someObj; 
+    } 
+    
     bool is_valid(){
         return true;
     }
