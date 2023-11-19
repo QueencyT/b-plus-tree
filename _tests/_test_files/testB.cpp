@@ -22,15 +22,96 @@ bool test_copy(bool debug){
     cout<<"curr tree struct: \n"; 
     mTree.print_tree(0, cout); //so far seems to be working 
 
-    //BPlusTree<int>* last; 
-    //copyTree.copy_tree(mTree, last); 
+    BPlusTree<int>* last; 
+    copyTree.copy_tree(mTree, last); 
 
-    //cout<<"copied tree: \n"; 
-    //copyTree.print_tree(); 
+    cout<<"copied tree: \n"; 
+    copyTree.print_tree(); 
 
-    //cout<<"last node: "<<last->data[1]<<endl; 
-    //cout<<"last: child count: "<<last->child_count<<endl; 
+    cout<<"last node: "<<last->data[1]<<endl; 
+    cout<<"last: child count: "<<last->child_count<<endl; 
+
+    string inorder1 = mTree.in_order(); 
+    string inorder2 = copyTree.in_order(); 
+    cout<<"orig in order: "<<inorder1<<endl; 
+    cout<<"copy in order: "<<inorder2<<endl; 
+    return (inorder1 == inorder2); 
   }
+}
+
+bool test_remove(bool debug){
+  if(false){
+    cout<<"TEST - MERGING BEGINNING CASE - REMOVE - SIMPLE\n"; 
+    int data[] = {180, 200, 120, 190}; 
+    BPlusTree<int> mTree(data, 4); 
+    cout<<"tree before removal: "<<endl; 
+    mTree.print_tree(); 
+
+    cout<<"after removing 120\n"; 
+    mTree.remove(120); 
+    cout<<mTree<<endl; 
+    cout<<"in order: "<<mTree.in_order()<<endl; 
+
+  }
+
+  if(false){
+    cout<<"TEST - STEAL FROM RIGHT CASE - REMOVE - SIMPLE\n"; 
+    int data[] = {180, 200, 120, 190}; 
+    BPlusTree<int> mTree(data, 4); 
+    cout<<"tree before removal: "<<endl; 
+    mTree.print_tree(); 
+
+    cout<<"after removing 180\n"; 
+    mTree.remove(180); 
+    cout<<mTree<<endl; 
+    cout<<"in order: "<<mTree.in_order()<<endl; 
+
+  }
+
+  if(false){
+    cout<<"TEST - STEAL FROM LEFT CASE - REMOVE - SIMPLE\n"; 
+    int data[] = {180, 119, 120, 121}; 
+    BPlusTree<int> mTree(data, 4); 
+    cout<<"tree before removal: "<<endl; 
+    mTree.print_tree(); 
+
+    cout<<"after removing 120\n"; 
+    mTree.remove(120); 
+    cout<<mTree<<endl; 
+    cout<<"in order: "<<mTree.in_order()<<endl; 
+  }
+
+  if(debug){
+    cout<<"TEST - REMOVE - COMPLEX CASE\n"; 
+    BPlusTree<int> mTree; 
+    srand(time(0)); 
+
+    for(int i = 0; i < 10; i++){
+      int rando = rand() % 800 + 100; 
+      mTree.insert(rando); 
+    }
+
+    cout<<"Initial tree: "<<endl; 
+    cout<<mTree<<endl; 
+
+    while(!mTree.empty()){
+      int rando = rand() % 800 + 100; 
+      if(mTree.contains(rando)){
+        cout<<"REMOVING: "<<rando<<endl; 
+        mTree.remove(rando); 
+        cout<<mTree<<endl; 
+        cout<<"in order: "<<mTree.in_order()<<endl; 
+        cout<<"--------------------------\n"; 
+        if(mTree.contains(rando)){
+          cout<<"FAILED TO REMOVE: "<<rando<<endl; 
+          cout<<mTree<<endl; 
+          cout<<"in order: "<<mTree.in_order()<<endl; 
+        }
+      }  
+    }
+  }
+
+  return true; 
 }
 
 bool test_stub(bool debug = false)
@@ -50,6 +131,10 @@ TEST(TEST_STUB, TestStub) {
 
 TEST(TEST_COPY, testCopy){
   EXPECT_EQ(1, test_copy(true)); 
+}
+
+TEST(TEST_REMOVE, testRemove){
+  EXPECT_EQ(1, test_remove(false));
 }
 
 

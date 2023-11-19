@@ -2,7 +2,7 @@
 #define BTREE_H 
 
 #include <iostream>
-#include "../../includes/bplustree/btree_array_functions.h" 
+#include "../../includes/bplustree/btree_array_funcs.h"
 #include <assert.h>
 
 using namespace std; 
@@ -218,8 +218,8 @@ void BTree<T>::fix_shortage(int shortIndex){
     else if(STEAL_LEFT){//can steal from left
       //  cout<<"short index: "<<shortIndex<<endl; 
        cout<<"before steal from left\n";
-       cout<<*this<<endl; 
-       cout<<"--------------------\n";
+       //cout<<*this<<endl; 
+       //cout<<"--------------------\n";
         rotate_right(shortIndex); 
         cout<<"after steal from left\n";
         cout<<*this<<endl; 
@@ -227,8 +227,8 @@ void BTree<T>::fix_shortage(int shortIndex){
     }
     else if(BEGIN_CASE){//begin case
         cout<<"before begin\n";
-        cout<<*this<<endl; 
-        cout<<"--------------------\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
         delete_item(data, 0, data_count, deleted); //delete begin
         ordered_insert(shortChild->data, shortChild->data_count, deleted); 
         merge_with_next_subset(shortIndex); 
@@ -238,8 +238,8 @@ void BTree<T>::fix_shortage(int shortIndex){
     }
     else{
         cout<<"before other\n";
-        cout<<*this<<endl; 
-        cout<<"--------------------\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
         delete_item(data, shortIndex - 1, data_count, deleted); //delete last //first less than equal
         ordered_insert(shortChild->data, shortChild->data_count, deleted);
         merge_with_next_subset(shortIndex - 1);

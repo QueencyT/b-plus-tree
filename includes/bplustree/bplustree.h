@@ -1,8 +1,7 @@
 #ifndef BPLUS_TREE_H 
 #define BPLUS_TREE_H 
 
-#include "../../includes/btree/btree.h"
-#include "../../includes/bplustree/btree_array_functions.h"
+#include "../../includes/bplustree/btree_array_funcs.h"
 
 template <class T>
 class BPlusTree
@@ -16,16 +15,24 @@ public:
 
         //return first data item in b plus tree
         T operator *(){
-            //return it->data[0]; 
+            return it->data[key_ptr]; 
         }
 
         Iterator operator++(int un_used){//hmm?
-            Iterator returnIter(it->_next, key_ptr++); 
+            key_ptr++; 
+            if(key_ptr == it->data_count){ //next bPlusTree 
+                key_ptr = 0;
+            }
+            Iterator returnIter(it->next, key_ptr); 
             return returnIter; 
         }
 
-        Iterator operator++(){//hmm?
-            Iterator returnIter(it->next, key_ptr++); 
+        Iterator operator++(){
+            key_ptr++; 
+            if(key_ptr == it->data_count){ //next bPlusTree 
+                key_ptr = 0;
+            }
+            Iterator returnIter(it->next, key_ptr); 
             return returnIter; 
         }
 
@@ -80,6 +87,8 @@ public:
     T& get(const T& entry);              //return a reference to entry
     const T& get(const T& entry)const;   //return a reference to entry
     T& get_existing(const T& entry);     //return a reference to entry
+
+
     Iterator find(const T& key);         //return an iterator to this key.
                                          //     NULL if not there.
     Iterator lower_bound(const T& key);  //return first that goes NOT BEFORE
@@ -102,8 +111,9 @@ public:
     bool is_valid();
     string in_order();
 
-    Iterator begin();
+    Iterator begin(); 
     Iterator end();
+
     ostream& list_keys(Iterator from = NULL, Iterator to = NULL){
         if (from == NULL) from = begin();
         if (to == NULL) to = end();
@@ -164,6 +174,71 @@ private:
 
 };
 
+//More iterator funcs 
+
+template <typename T>
+typename BPlusTree<T>::Iterator BPlusTree<T>::begin(){
+    if(is_leaf()){
+        Iterator returnIter(this, 0); 
+        return returnIter; 
+    }
+   subset[0]->begin(); //go to left most child
+}
+
+
+template <typename T>
+typename BPlusTree<T>::Iterator BPlusTree<T>::end(){
+    if(is_leaf()){
+        Iterator returnIter(this, 0); 
+        return returnIter; 
+    }
+   subset[child_count - 1]->end(); //go to right most child
+}
+
+template <typename T>
+typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T& key){
+    BPlusTree<T>* found = find_ptr(key); 
+    Iterator nullIter(nullptr, 0); 
+
+    if(found){
+        int index = first_ge(found->data, data_count, key); 
+        Iterator returnIter(find_ptr(key), index); 
+        return returnIter; 
+    }
+
+    return nullIter; 
+}     
+//return an iterator to this key. NULL if not there.
+
+template <typename T>
+typename BPlusTree<T>::Iterator BPlusTree<T>::lower_bound(const T& key){ //assuming we are trying to find the previous ???
+    Iterator tempIter; 
+    return tempIter; 
+}
+//return first that goes NOT BEFORE
+// key entry or next if does not
+// exist: >= entry
+
+template <typename T>
+typename BPlusTree<T>::Iterator BPlusTree<T>::upper_bound(const T& key){
+    BPlusTree<T>* found = find_ptr(key); 
+    Iterator nullIter(nullptr, 0); 
+
+    if(found){
+        int index = first_ge(found->data, data_count, key); 
+        int nextIndex = index + 1; 
+        Iterator returnIter(find_ptr(key), index);  
+
+        if(nextIndex < data_count)
+            Iterator returnIter(find_ptr(key), index); 
+    
+        return returnIter; 
+    }
+
+    return nullIter; 
+}  //return first that goes AFTER key
+                                        //exist or not, the next entry  >entry
+
 template <typename T>
 BPlusTree<T>::BPlusTree(bool dups){
     next = nullptr; 
@@ -176,6 +251,8 @@ template <typename T>
 BPlusTree<T>::BPlusTree(T *a, int size, bool dups){ //making a btree
     next = nullptr; 
     dups_ok = dups; 
+    data_count = 0; 
+    child_count = 0; 
     for(int i = 0; i < size; i++){
         insert(a[i]); 
     }
@@ -184,19 +261,27 @@ BPlusTree<T>::BPlusTree(T *a, int size, bool dups){ //making a btree
 //big three:
 
 template <typename T>
-BPlusTree<T>::BPlusTree(const BPlusTree<T>& other){
-
+BPlusTree<T>::BPlusTree(const BPlusTree<T>& other){//copy ctor
+    child_count = 0; 
+    data_count = 0; 
+    copy_tree(other); 
 }
 
 template <typename T>
 BPlusTree<T>::~BPlusTree(){
-
+    clear_tree(); 
 }
 
 
 template <typename T>
 BPlusTree<T>& BPlusTree<T>::operator =(const BPlusTree<T>& RHS){
+    if(this == RHS){
+        return *this; 
+    }
 
+    clear_tree(); 
+    copy_tree(RHS); 
+    return *this; 
 }
 
 template <typename T>
@@ -292,14 +377,16 @@ template <typename T>
 void BPlusTree<T>::loose_remove(const T& entry){
     int goToIndex = first_ge(data, data_count, entry); 
 
-    if(goToIndex < data_count && data[goToIndex] == entry && is_leaf()){//found //kee
-        T temp; 
-        delete_item(data, goToIndex, data_count, temp); 
-        if(!is_leaf()){ //of we are not leaf
-            T replaceWith; 
-            //subset[goToIndex]->remove_biggest(replaceWith); //so we don't go to excess replace of this subtree we found
-            //ordered_insert(data, data_count, replaceWith);
+    if(goToIndex < data_count && data[goToIndex] == entry){//found //kee
+        T temp;  
+        //deleting breadcrumbs first
+        if(!is_leaf()){ //of we are not leaf, we need to go to breadcrumbs and remove
+            cout<<"going for breadcrumbs: "<<endl; 
+            BPlusTree<T>* right = subset[goToIndex + 1]; 
+            right->loose_remove(entry); 
+            fix_shortage(goToIndex + 1); //goToIndex should be short index
         }
+        delete_item(data, goToIndex, data_count, temp); 
     }
     else if(is_leaf()){ //leaf and not found
         return;
@@ -309,15 +396,71 @@ void BPlusTree<T>::loose_remove(const T& entry){
     }
 
     if(!is_leaf() && subset[goToIndex]->data_count < MINIMUM){
+        cout<<"we are short\n"; 
         fix_shortage(goToIndex); //goToIndex should be short index
     }   
 }//allows MINIMUM-1 data elements
                                     //  in the root
 
 template <typename T>
-BPlusTree<T>* BPlusTree<T>::fix_shortage(int i){
-    BPlusTree<T>* temp; 
-    return temp; 
+BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we just removed, 
+    T deleted; 
+    BPlusTree<T>* left = nullptr; 
+    BPlusTree<T>* right = nullptr; 
+    BPlusTree<T>* shortChild = subset[shortIndex]; //data_count should be 0 in this case
+    if(shortIndex != child_count - 1)
+        right = subset[shortIndex + 1]; 
+    if(shortIndex != 0)
+        left = subset[shortIndex - 1];
+    bool STEAL_RIGHT = (right && right->data_count > MINIMUM), STEAL_LEFT = left && left->data_count > MINIMUM, BEGIN_CASE = (shortIndex == 0); 
+
+    if(STEAL_RIGHT){//can steal from right
+        cout<<"steal right\n"; 
+       // cout<<"short index: "<<shortIndex<<endl;
+        //cout<<"before steal from right\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+        transfer_left(shortIndex); 
+        //cout<<"after steal from right\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+    }
+    else if(STEAL_LEFT){//can steal from left
+      //  cout<<"short index: "<<shortIndex<<endl; 
+      cout<<"before steal from left\n";
+      // cout<<*this<<endl; 
+       //cout<<"--------------------\n";
+        transfer_right(shortIndex); 
+        //cout<<"after steal from left\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+    }
+    else if(BEGIN_CASE){//begin case
+        cout<<"before begin\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+        delete_item(data, 0, data_count, deleted); //delete begin
+        if(!shortChild->is_leaf())
+            ordered_insert(shortChild->data, shortChild->data_count, deleted); 
+        merge_with_next_subset(shortIndex); 
+       // cout<<"after begin\n";
+       // cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+    }
+    else{
+        cout<<"before other\n";
+        //cout<<*this<<endl; 
+        //cout<<"--------------------\n";
+        delete_item(data, shortIndex - 1, data_count, deleted); //delete last //first less than equal
+        if(!shortChild->is_leaf()) //if we are not leaf, then isnert to short child, else don't 
+            ordered_insert(shortChild->data, shortChild->data_count, deleted);
+        merge_with_next_subset(shortIndex - 1);
+       // cout<<"after other\n";
+       // cout<<*this<<endl; 
+       // cout<<"--------------------\n";
+    }
+    //Need to return 
+   // return 
 }  //fix shortage in child i
 // and return the smallest key in this subtree
 
@@ -340,25 +483,100 @@ void BPlusTree<T>::get_biggest(T& entry){
 }       //entry := rightmost leaf
 
 template <typename T>
-void BPlusTree<T>::remove_biggest(T& entry){
+void BPlusTree<T>::remove_biggest(T& entry){ //hm?
      BPlusTree<T>* temp; 
     return temp; 
 }   //remove the biggest child of tree->entry
 
 template <typename T>
-void BPlusTree<T>::transfer_left(int i){
+void BPlusTree<T>::transfer_left(int index){ //assuming this is rotate left //stealing from right 
+    //assuming for the rotates nothing changes about the next ptr 
+    T deleted;
+    BPlusTree<T>* deletedChild; 
+    BPlusTree<T>* shortChild = subset[index];  //rotate to 
+    BPlusTree<T>* right = subset[index + 1]; //borrowing from right
 
+    if(!shortChild->is_leaf()){ 
+        delete_item(data, index, data_count, deleted); //deleting from parent 
+        ordered_insert(shortChild->data, shortChild->data_count, deleted);
+        delete_item(right->data, 0,right->data_count, deleted); 
+        ordered_insert(data, data_count, deleted); 
+
+        if(!right->is_leaf()){
+         delete_item(right->subset, 0, right->child_count, deletedChild); 
+         insert_item(shortChild->subset, shortChild->data_count, shortChild->child_count, deletedChild); //getting from right so should be larger 
+        }
+    }
+    else{
+
+    }
+    
+
+    //steal child 
+    
+
+    /*
+
+    if(!shortChild->is_leaf()){
+        delete_item(data, index, data_count, deleted); //deleting from parent
+        ordered_insert(shortChild->data, shortChild->data_count, deleted); //inserting deleted into short
+    }
+
+    delete_item(right->data, 0,right->data_count, deleted); 
+
+    if(shortChild->is_leaf()){
+        delete_item(right->data, 0, right->data_count, )
+        //ordered_insert(shortChild->data, shortChild->data_count, deleted); 
+        //ordered_insert(data, data_count, right->data[0]);
+    }
+    else{
+        ordered_insert(data, data_count, deleted); 
+    }
+
+    //steal child 
+    if(!right->is_leaf()){
+         delete_item(right->subset, 0, right->child_count, deletedChild); 
+         insert_item(shortChild->subset, shortChild->data_count, shortChild->child_count, deletedChild); //getting from right so should be larger 
+    }*/
 } //transfer one element LEFT from child i
 
 template <typename T>
-void BPlusTree<T>::transfer_right(int i){
+void BPlusTree<T>::transfer_right(int index){//assuming this is rotate right //stealing from left
+    //when we are at leaves, do 
+    T deleted; 
+    BPlusTree<T>* deletedChild; 
+    BPlusTree<T>* shortChild = subset[index]; 
+    BPlusTree<T>* left = subset[index - 1];
+    delete_item(data, index - 1, data_count, deleted); //delete from parent, but don't attach to child
+    if(!shortChild->is_leaf()) //must test, only do this for when leaf, or all the time
+        ordered_insert(shortChild->data, shortChild->data_count, deleted);  
+    
+    delete_item(left->data, left->data_count - 1, left->data_count, deleted); //stealing from left
+    ordered_insert(data, data_count, deleted); //inser
 
+    if(!shortChild->is_leaf()) //must test, only do this for when leaf, or all the time
+        ordered_insert(shortChild->data, shortChild->data_count, deleted);  //insert what was deleted from left into shortChild
+
+    //steal child
+    if(!left->is_leaf()){
+        delete_item(left->subset, left->child_count - 1, left->child_count, deletedChild); //stealing right most child
+        insert_item(shortChild->subset, 0, shortChild->child_count, deletedChild); 
+    }
 } //transfer one element RIGHT from child i
 
 template <typename T>
-BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int i){
-     BPlusTree<T>* temp; 
-    return temp; 
+BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int index){
+    //doesn't seem like I need to update the next ptr
+    BPlusTree<T>* deleted; 
+    BPlusTree<T>* merging = subset[index]; 
+    BPlusTree<T>* right = subset[index + 1]; 
+    merge(merging->data, merging->data_count, right->data, right->data_count); 
+    merge(merging->subset, merging->child_count, right->subset, right->child_count);
+    delete_item(subset, index+1, child_count, deleted);
+    delete deleted;
+    deleted = nullptr;
+
+    //needs to return something?
 }//merge subset i with  i+1
 
 template <typename T>
@@ -368,8 +586,11 @@ void BPlusTree<T>::remove(const T& entry){
     }
 
     loose_remove(entry); 
+    cout<<"after removal: "<<entry<<endl; 
+    cout<<*this<<endl;
     BPlusTree<T>* child = subset[0];  
     if(data_count == 0 && !is_leaf()){//if we ourself is short  
+        cout<<"root short\n";
         child_count = 0;
         copy_array(data, child->data, data_count, child->data_count);
         copy_array(subset, child->subset, child_count, child->child_count); 
@@ -396,8 +617,22 @@ void BPlusTree<T>::clear_tree(){ //don't think we need to do anything to next
 
 template <typename T>
 bool BPlusTree<T>::contains(const T& entry) const{
-    T* found = find_ptr(entry); 
-    return (found); //so found
+    int index = first_ge(data, data_count, entry); 
+    bool foundPtr = false; 
+  
+    if(index < data_count && data[index] == entry && is_leaf()){ //go right --> else entry must be kess so we go left =
+        foundPtr = true; 
+    }
+    else if(index < data_count && data[index] == entry){
+       foundPtr = subset[index + 1]->find_ptr(entry); 
+    }
+    else if(is_leaf()){
+        return false; //no children and not found 
+    }
+    else{
+       foundPtr = subset[index]->find_ptr(entry); //go left or right depending on what index
+    }
+    return foundPtr; 
 } 
 
 //true if entry can be found
@@ -409,7 +644,7 @@ T& BPlusTree<T>::get(const T& entry){
 }//return a reference to entry
 
 template <typename T>
-const T& BPlusTree<T>::get(const T& entry) const{
+const T& BPlusTree<T>::get(const T& entry) const{ //what if not found??
     T* found = find_ptr(entry); 
     return *found; 
 }//return a reference to entry
@@ -447,8 +682,8 @@ void BPlusTree<T>::print_tree(int level, ostream &outs) const{
             subset[i]->print_tree(level + 1, outs); //child will always be one more than data count  
         if(i!= 0){
             outs<<setw(6 * level)<<"["<<data[i - 1]<<"]"<<"cc: "<<child_count; 
-           // if(next)
-                //outs<<"next: "<<next->data[0];  
+            //if(next)
+               // outs<<"next: "<<next->data[0];  
             outs<<endl; 
         }
     }
