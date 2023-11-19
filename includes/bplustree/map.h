@@ -4,7 +4,7 @@
 #include "../../includes/bplustree/pair.h"
 #include "../../includes/bplustree/bplustree.h"
 
-
+template <typename K, typename V>
 class Map
 {
 public:

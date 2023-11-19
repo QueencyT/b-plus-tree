@@ -374,36 +374,6 @@ void BPlusTree<T>::insert(const T& entry){
 
 
 
-//remove element functions:
-template <typename T>
-void BPlusTree<T>::loose_remove(const T& entry){
-    int goToIndex = first_ge(data, data_count, entry); 
-
-    if(goToIndex < data_count && data[goToIndex] == entry){//found //kee
-        T temp;  
-        //deleting breadcrumbs first
-        if(!is_leaf()){ //of we are not leaf, we need to go to breadcrumbs and remove
-            cout<<"going for breadcrumbs: "<<endl; 
-            BPlusTree<T>* right = subset[goToIndex + 1]; 
-            right->loose_remove(entry); 
-            fix_shortage(goToIndex + 1); //goToIndex should be short index
-        }
-       delete_item(data, goToIndex, data_count, temp); 
-
-    }
-    else if(is_leaf()){ //leaf and not found
-        return;
-    }
-    else{
-        subset[goToIndex]->loose_remove(entry);
-    }
-
-    if(!is_leaf() && subset[goToIndex]->data_count < MINIMUM){
-        cout<<"we are short\n"; 
-        fix_shortage(goToIndex); //goToIndex should be short index
-    }   
-}//allows MINIMUM-1 data elements
-                                    //  in the root
 
 template <typename T>
 BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we just removed, 
@@ -420,10 +390,9 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
 
     if(STEAL_RIGHT){//can steal from right
         cout<<"steal right\n"; 
-       // cout<<"short index: "<<shortIndex<<endl;
-        //cout<<"before steal from right\n";
-        //cout<<*this<<endl; 
-        //cout<<"--------------------\n";
+        cout<<"before steal from right\n";
+        cout<<*this<<endl; 
+        cout<<"--------------------\n";
         transfer_left(shortIndex); 
         //cout<<"after steal from right\n";
         //cout<<*this<<endl; 
@@ -448,6 +417,7 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
         if(!shortChild->is_leaf())
             ordered_insert(shortChild->data, shortChild->data_count, deleted); 
         returned = merge_with_next_subset(shortIndex); 
+        cout<<"return data: "<<returned->data[0]<<endl; 
         //returned->get_smallest(small); 
        // cout<<"after begin\n";
        // cout<<*this<<endl; 
@@ -461,11 +431,15 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
         if(!shortChild->is_leaf()) //if we are not leaf, then isnert to short child, else don't 
             ordered_insert(shortChild->data, shortChild->data_count, deleted);
         returned = merge_with_next_subset(shortIndex - 1);
+        //cout<<"return data: "<<returned->data[0]<<endl; 
        // cout<<"after other\n";
        // cout<<*this<<endl; 
        // cout<<"--------------------\n";
     }
     //Need to return 
+    if(returned){
+        cout<<"returned data: "<<returned->data[0]<<endl; 
+    }
    return returned; 
 }  //fix shortage in child i
 // and return the smallest key in this subtree
@@ -592,6 +566,10 @@ void BPlusTree<T>::transfer_right(int index){//assuming this is rotate right //s
 template <typename T>
 BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int index){
     //doesn't seem like I need to update the next ptr
+
+    cout<<"before merged: "<<endl; 
+    cout<<*this<<endl;  
+    cout<<"-------------------\n";
     BPlusTree<T>* deleted; 
     BPlusTree<T>* merging = subset[index]; 
     BPlusTree<T>* right = subset[index + 1]; 
@@ -600,9 +578,49 @@ BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int index){
     delete_item(subset, index+1, child_count, deleted);
     delete deleted;
     deleted = nullptr;
+    cout<<"after merged: "<<endl; 
+    cout<<*this<<endl; 
+    cout<<"-------------------\n";
     return merging; //returning the short child?
     //needs to return something?
 }//merge subset i with  i+1
+
+
+
+//remove element functions:
+template <typename T>
+void BPlusTree<T>::loose_remove(const T& entry){
+    int goToIndex = first_ge(data, data_count, entry); 
+
+    if(goToIndex < data_count && data[goToIndex] == entry){//found //kee
+        T temp;  
+        //deleting breadcrumbs first
+        if(!is_leaf()){ //of we are not leaf, we need to go to breadcrumbs and remove
+            cout<<"going for breadcrumsb\n";
+            BPlusTree<T>* right = subset[goToIndex + 1]; 
+            right->loose_remove(entry); 
+            BPlusTree<T>* returned = fix_shortage(goToIndex + 1); //goToIndex should be short index
+            cout<<"replacing with: "<<returned->data[0]<<endl; 
+            data[goToIndex] = returned->data[0]; //probs not right --> but temp for now
+        }
+        else{
+            cout<<"deleting: "<<entry<<endl; 
+            delete_item(data, goToIndex, data_count, temp); 
+        }
+
+    }
+    else if(is_leaf()){ //leaf and not found
+        return;
+    }
+    else{
+        subset[goToIndex]->loose_remove(entry);
+    }
+
+    if(!is_leaf() && subset[goToIndex]->data_count < MINIMUM){
+        fix_shortage(goToIndex); //goToIndex should be short index
+    }   
+}//allows MINIMUM-1 data elements
+                                    //  in the root
 
 template <typename T>
 void BPlusTree<T>::remove(const T& entry){
