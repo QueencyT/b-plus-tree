@@ -65,11 +65,11 @@ public:
 
 //  Element Access
     const vector<V>& operator[](const K& key) const{
-        vector<V> someVec; 
+        vector<V> someVec = new vector<V>; 
         return someVec; 
     }
     vector<V>& operator[](const K& key){
-         vector<V> someVec; 
+         vector<V> someVec = new vector<V>; 
         return someVec; 
     }
 
@@ -91,7 +91,7 @@ public:
     }
 
     vector<V> &get(const K& key){
-        vector<V> someVec; 
+        vector<V> someVec = new vector<V>; 
         return someVec; 
     }
 
@@ -128,10 +128,10 @@ public:
 
 
     const V& at(const K& key) const{
-        V someObj; 
+        V someObj = new V; 
         return someObj; 
     } 
-    
+
     bool is_valid(){
         return true;
     }

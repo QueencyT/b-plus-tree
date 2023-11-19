@@ -37,7 +37,7 @@ public:
         }
 
         friend bool operator ==(const Iterator& lhs, const Iterator& rhs){ //what is keyptr
-            return (lhs._it == rhs._it && lhs.key_ptr == rhs.key_ptr); 
+            return (lhs.it == rhs.it && lhs.key_ptr == rhs.key_ptr); 
         }
         friend bool operator !=(const Iterator& lhs, const Iterator& rhs){
             return(!(lhs == rhs)); 
@@ -196,6 +196,7 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::end(){
     }
    subset[child_count - 1]->end(); //go to right most child*/
    BPlusTree<T>::Iterator nullIter(nullptr, 0); 
+   return nullIter; 
 }
 
 template <typename T>
@@ -474,9 +475,9 @@ template <typename T>
 BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int index){
     //doesn't seem like I need to update the next ptr
 
-    /*cout<<"before merged: "<<endl; 
-    cout<<*this<<endl;  
-    cout<<"-------------------\n";*/
+    //cout<<"before merged: "<<endl; 
+    //cout<<*this<<endl;  
+    //cout<<"-------------------\n";
     BPlusTree<T>* deleted; 
     BPlusTree<T>* merging = subset[index]; 
     BPlusTree<T>* right = subset[index + 1]; 
@@ -485,10 +486,11 @@ BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int index){
     delete_item(subset, index+1, child_count, deleted);
     delete deleted;
     deleted = nullptr;
-   /* cout<<"after merged: "<<endl; 
-    cout<<*this<<endl; 
-    cout<<"-------------------\n";
-    */
+    
+    //cout<<"after merged: "<<endl; 
+    //cout<<*this<<endl; 
+    //cout<<"-------------------\n";
+    
     return merging; //returning the short child?
     //needs to return something?
 }//merge subset i with  i+1
@@ -531,29 +533,30 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
     else if(BEGIN_CASE){//begin case
         T small; 
         cout<<"before begin\n";
-        //cout<<*this<<endl; 
-        //cout<<"--------------------\n";
+        cout<<*this<<endl; 
+        cout<<"--------------------\n";
         delete_item(data, 0, data_count, deleted); //delete begin
         if(!shortChild->is_leaf())
             ordered_insert(shortChild->data, shortChild->data_count, deleted); 
         returned = merge_with_next_subset(shortIndex); 
+        cout<<"returning: "<<returned->data[0]<<endl; 
         //returned->get_smallest(small); 
-       // cout<<"after begin\n";
-       // cout<<*this<<endl; 
-        //cout<<"--------------------\n";
+        cout<<"after begin\n";
+        cout<<*this<<endl; 
+        cout<<"--------------------\n";
     }
     else{
         cout<<"before other\n";
-        //cout<<*this<<endl; 
-        //cout<<"--------------------\n";
+        cout<<*this<<endl; 
+        cout<<"--------------------\n";
         delete_item(data, shortIndex - 1, data_count, deleted); //delete last //first less than equal
         if(!shortChild->is_leaf()) //if we are not leaf, then isnert to short child, else don't 
             ordered_insert(shortChild->data, shortChild->data_count, deleted);
         returned = merge_with_next_subset(shortIndex - 1);
         //cout<<"return data: "<<returned->data[0]<<endl; 
-       // cout<<"after other\n";
-       // cout<<*this<<endl; 
-       // cout<<"--------------------\n";
+        cout<<"after other\n";
+       cout<<*this<<endl; 
+        cout<<"--------------------\n";
     }
    return returned; 
 }  //fix shortage in child i
@@ -570,18 +573,24 @@ void BPlusTree<T>::loose_remove(const T& entry){
         //deleting breadcrumbs first
         if(!is_leaf()){ //of we are not leaf, we need to go to breadcrumbs and remove
             T small;  
-            /*cout<<"going for breadcrumsb\n";
-            cout<<"returned tree\n"; 
-            cout<<*this<<endl; 
-            cout<<"-----------------------\n";*/
+            /*cout<<"going for breadcrumsb\n";*/
             BPlusTree<T>* right = subset[goToIndex + 1]; 
             right->loose_remove(entry); 
-            right->get_smallest(small); 
-            data[goToIndex] = small; 
             BPlusTree<T>* returned = fix_shortage(goToIndex + 1);
-            data[goToIndex] = returned->data[0];
+
+            cout<<"returned tree\n"; 
+            cout<<*this<<endl; 
+            cout<<"-----------------------\n";
+
+            right->get_smallest(small);
+            cout<<"replacing: "<<data[0]<<" with "<<small<<endl;  
+            data[goToIndex] = small; 
+
+            //cout<<"replacing: "<<data[0]<<" with "<<returned->data[0]<<endl; 
+            //data[goToIndex] = returned->data[0];
         }
         else{
+            cout<<"deleted: "<<data[goToIndex]<<endl; 
             delete_item(data, goToIndex, data_count, temp); 
         }
 

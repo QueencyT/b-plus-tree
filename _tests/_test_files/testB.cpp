@@ -85,7 +85,7 @@ bool test_remove(bool debug){
     cout<<"in order: "<<mTree.in_order()<<endl; 
   }
 
-  if(false){
+  if(debug){
     cout<<"TEST - REMOVE - SPECIFIC CASE\n"; 
     int data[] = {176, 289, 317, 346, 412, 466, 483, 494, 513, 592, 644}; 
     int data2[] = {318,604,695, 200, 385, 100,150, 950}; 
@@ -94,13 +94,13 @@ bool test_remove(bool debug){
     cout<<mTree<<endl; 
 
 
-    cout<<"removing: "<<317<<endl; 
-    mTree.remove(317); 
+    cout<<"removing: "<<412<<endl; 
+    mTree.remove(412); 
     cout<<mTree<<endl; 
     cout<<"in order: "<<mTree.in_order()<<endl; 
 
   }
-  if(true){
+  if(false){
     cout<<"TEST - REMOVE - COMPLEX CASE\n"; 
     BPlusTree<int> mTree; 
     srand(time(0)); 
