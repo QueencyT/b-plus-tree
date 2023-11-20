@@ -105,7 +105,7 @@ bool test_remove(bool debug){
     BPlusTree<int> mTree; 
     srand(time(0)); 
 
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 25; i++){
       int rando = rand() % 800 + 100; 
       mTree.insert(rando); 
     }
@@ -126,6 +126,7 @@ bool test_remove(bool debug){
           cout<<"FAILED TO REMOVE: "<<rando<<endl; 
           cout<<mTree<<endl; 
           cout<<"in order: "<<mTree.in_order()<<endl; 
+          return false; 
         }
       }  
     }
@@ -142,6 +143,20 @@ bool test_stub(bool debug = false)
   return true;
 }
 
+bool test_traversal(bool debug){
+  if(debug){
+    cout<<"Test pre-order "<<endl; 
+    int data[] = {43, 20, 96, 100, 69, 10, 50, 200, 12, 300, 55};
+    BPlusTree<int> mTree(data, 11); 
+    cout<<"curr tree: \n"; 
+    cout<<mTree<<endl; 
+
+    cout<<"in order: "<<mTree.in_order()<<endl; 
+    cout<<"pre order: "<<mTree.pre_order()<<endl; 
+    cout<<"post order: "<<mTree.post_order()<<endl; 
+  }
+}
+
 TEST(TEST_STUB, TestStub) {
   
   //EXPECT_EQ(0, <your individual test functions are called here>);
@@ -154,7 +169,11 @@ TEST(TEST_COPY, testCopy){
 }
 
 TEST(TEST_REMOVE, testRemove){
-  EXPECT_EQ(1, test_remove(true));
+  EXPECT_EQ(1, test_remove(false));
+}
+
+TEST(TEST_TRAVERSALS, testTraversal){
+  EXPECT_EQ(1, test_traversal(true)); 
 }
 
 

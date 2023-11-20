@@ -28,7 +28,7 @@ bool bplustree_test(){
   cout << "pre order:   " << bt.pre_order() << endl;
   cout << "post order:  " << bt.post_order() << endl;
   cout << "adding 10, 50, 200: " << endl;
-  bt.insert(10);
+  bt.insert(10); 
   bt.insert(50);
   bt.insert(200);
   cout << "in order:    " << bt.in_order() << endl;

@@ -582,11 +582,13 @@ void BPlusTree<T>::loose_remove(const T& entry){
             /*cout<<"going for breadcrumsb\n";*/
             BPlusTree<T>* right = subset[goToIndex + 1]; 
             right->loose_remove(entry); 
+           // cout<<"removing: "<<entry<<"breadcumb\n"; 
+           
             if(!is_leaf() && subset[goToIndex + 1]->data_count < MINIMUM)
                 BPlusTree<T>* returned = fix_shortage(goToIndex + 1);
 
             right->get_smallest(small);
-            cout<<"replacing: "<<data[0]<<" with "<<small<<endl;  
+            cout<<"replacing: "<<data[goToIndex]<<" with "<<small<<endl;  
             data[goToIndex] = small;
         }
         else{
@@ -600,6 +602,12 @@ void BPlusTree<T>::loose_remove(const T& entry){
     else{
         subset[goToIndex]->loose_remove(entry);
     }
+
+    if(subset[goToIndex]){
+        //cout<<"short child: "<<subset[goToIndex]->data[0]<<endl; 
+       // cout<<"child: "<<subset[goToIndex]->data_count<<endl;
+    }
+     
 
     if(!is_leaf() && subset[goToIndex]->data_count < MINIMUM){
         fix_shortage(goToIndex); //goToIndex should be short index
@@ -645,12 +653,10 @@ template <typename T>
 bool BPlusTree<T>::contains(const T& entry) const{
     int index = first_ge(data, data_count, entry); 
     bool foundPtr = false; 
-  
-    if(index < data_count && data[index] == entry && is_leaf()){ //go right --> else entry must be kess so we go left =
-        foundPtr = true; 
-    }
-    else if(index < data_count && data[index] == entry){
-       foundPtr = subset[index + 1]->find_ptr(entry); 
+    //cout<<"index: "<< index <<" path: "<<data[index]<<endl; 
+    if(index < data_count && data[index] == entry){ //go right --> else entry must be kess so we go left = 
+        ///cout<<"found: "<<entry<<endl; 
+        return true; 
     }
     else if(is_leaf()){
         return false; //no children and not found 
@@ -735,17 +741,38 @@ string BPlusTree<T>::in_order(){
 
 
 template <typename T>
-string BPlusTree<T>::post_order(){
-    //for now
-    return in_order(); 
+string BPlusTree<T>::post_order(){//print children, then print root
+    string postOrder = ""; 
+    for(int i = 0; i < data_count; i++){ 
+        if(!is_leaf()){
+            if(i == 0){
+                postOrder += subset[0]->post_order(); 
+                postOrder += subset[1]->post_order(); 
+            }
+            else{
+                 for(int n = i + 1; n < child_count; n++){ 
+                    postOrder += subset[n]->post_order(); // go get the children
+                }
+            }
+        } 
+        postOrder += to_string(data[i]) + "|"; //add all children
+    }
+    return postOrder; 
 }
 
 
 
 template <typename T>
 string BPlusTree<T>::pre_order(){
-    //for now
-    return in_order();
+    string preOrder = ""; 
+    for(int i = 0; i <= data_count; i++){
+        if(i < data_count){
+            preOrder += to_string(data[i]) + "|";  
+        }
+        if(!is_leaf())
+            preOrder += subset[i]->pre_order();     
+    }
+    return preOrder;
 }
 
 
