@@ -4,6 +4,7 @@
 using namespace std;
 
 #include "../../includes/bplustree/bplustree.h"
+#include "../../includes/bplustree/map.h"
 
 bool test_copy(bool debug){
   if(debug){
@@ -28,8 +29,8 @@ bool test_copy(bool debug){
     cout<<"copied tree: \n"; 
     copyTree.print_tree(); 
 
-    cout<<"last node: "<<last->data[1]<<endl; 
-    cout<<"last: child count: "<<last->child_count<<endl; 
+   // cout<<"last node: "<<last->data[1]<<endl; 
+    //cout<<"last: child count: "<<last->child_count<<endl; 
 
     string inorder1 = mTree.in_order(); 
     string inorder2 = copyTree.in_order(); 
@@ -157,6 +158,22 @@ bool test_traversal(bool debug){
   }
 }
 
+bool test_map_iter(bool debug){
+  if(debug){
+
+  }
+}
+
+bool test_get(bool debug){
+  if(debug){
+    BPlusTree<int> mTree; 
+    mTree.get(10); 
+    cout<<"after get: "<<endl; 
+    cout<<mTree<<endl; 
+  }
+  return true; 
+}
+
 TEST(TEST_STUB, TestStub) {
   
   //EXPECT_EQ(0, <your individual test functions are called here>);
@@ -176,6 +193,13 @@ TEST(TEST_TRAVERSALS, testTraversal){
   EXPECT_EQ(1, test_traversal(true)); 
 }
 
+TEST(TEST_MAP, testMapIter){
+  EXPECT_EQ(1, test_map_iter(true)); 
+}
+
+TEST(TEST_GET, testGet){
+  EXPECT_EQ(1, test_get(true)); 
+}
 
 
 int main(int argc, char **argv) {

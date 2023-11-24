@@ -66,7 +66,7 @@ public:
         }
 
     private:
-        BPlusTree<T>* it;
+        BPlusTree<T>* it; 
         int key_ptr;
     };
 
@@ -127,27 +127,20 @@ public:
 
     }
 
+    
+
+    
+
+private:
     static const int MINIMUM = 1;
     static const int MAXIMUM = 2 * MINIMUM;
-
+    
     bool dups_ok;                        //true if duplicate keys are allowed
     int data_count;                      //number of data elements
     T data[MAXIMUM + 1];                 //holds the keys
     int child_count;                     //number of children
     BPlusTree* subset[MAXIMUM + 2];      //subtrees
     BPlusTree* next;
-
-private:
-
-    /*static const int MINIMUM = 1;
-    static const int MAXIMUM = 2 * MINIMUM;
-
-    bool dups_ok;                        //true if duplicate keys are allowed
-    int data_count;                      //number of data elements
-    T data[MAXIMUM + 1];                 //holds the keys
-    int child_count;                     //number of children
-    BPlusTree* subset[MAXIMUM + 2];      //subtrees
-    BPlusTree* next;*/
 
 
     bool is_leaf() const{
@@ -210,15 +203,19 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T& key){
         return foundIter; 
     }
    }
-
-    return nullIter; 
+   return nullIter; 
 }     
 //return an iterator to this key. NULL if not there.
 
 template <typename T>
-typename BPlusTree<T>::Iterator BPlusTree<T>::lower_bound(const T& key){ //assuming we are trying to find the previous ???
-    BPlusTree<T>::Iterator tempIter; 
-    return tempIter; 
+typename BPlusTree<T>::Iterator BPlusTree<T>::lower_bound(const T& key){ //assuming we are trying to find the previous ??? //or curr iter
+    BPlusTree<T>* found = find_ptr(key); 
+    BPlusTree<T>::Iterator nullIter; 
+    if(found){
+        BPlusTree<T>::Iterator foundIter(found); 
+        return foundIter; 
+    }
+    return nullIter; 
 }
 //return first that goes NOT BEFORE
 // key entry or next if does not
@@ -230,12 +227,12 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::upper_bound(const T& key){
     Iterator nullIter(nullptr, 0); 
 
     if(found){
-        int index = first_ge(found->data, data_count, key); 
-        int nextIndex = index + 1; 
-        Iterator returnIter(find_ptr(key), index);  
+        //int index = first_ge(found->data, data_count, key); 
+        //int nextIndex = index + 1; 
+        BPlusTree<T>::Iterator returnIter(found->next);  
 
-        if(nextIndex < data_count)
-            Iterator returnIter(find_ptr(key), index); 
+        //if(nextIndex < data_count)
+            //BPlusTree<T>::Iterator returnIter(find_ptr(key)); 
     
         return returnIter; 
     }
@@ -355,6 +352,8 @@ void BPlusTree<T>::fix_excess(int fatIndex){
 
 template <typename T>
 void BPlusTree<T>::insert(const T& entry){
+
+    //if(!dus ok){}else{data[i] = data[i] + entry}
     if(find_ptr(entry))//not allowing dups
        return; 
   
@@ -664,26 +663,34 @@ bool BPlusTree<T>::contains(const T& entry) const{
     else{
        foundPtr = subset[index]->find_ptr(entry); //go left or right depending on what index
     }
-    return foundPtr; 
+    return foundPtr;   
 } 
 
 //true if entry can be found
 
 template <typename T>
-T& BPlusTree<T>::get(const T& entry){
+T& BPlusTree<T>::get(const T& entry){ //must test 
     T* found = find_ptr(entry); 
+    if(found){//if found
+        return *found;    
+    }
+    else{//not found, insert 
+        insert(entry); //insert entry 
+        found = find_ptr(entry); 
+    }
     return *found; 
 }//return a reference to entry
 
 template <typename T>
 const T& BPlusTree<T>::get(const T& entry) const{ //what if not found??
-    T* found = find_ptr(entry); 
+    T* found = find_ptr(entry); //can't change so no insertion? 
     return *found; 
 }//return a reference to entry
 
 template <typename T>
-T& BPlusTree<T>::get_existing(const T& entry){
+T& BPlusTree<T>::get_existing(const T& entry){ //assuming is in here
     T* found = find_ptr(entry); 
+    assert(found); 
     return *found; 
 }//return a reference to entry
 

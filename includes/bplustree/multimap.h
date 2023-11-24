@@ -13,23 +13,28 @@ public:
     public:
         friend class MMap;
         Iterator(){
-
+            _it = mmap.begin(); 
+            //dups ok is true for mmap
         }
+
         Iterator(typename map_base::Iterator it){
             _it = it; 
         }
+
         Iterator operator ++(int unused){
-            Iterator temp; 
-            return temp; 
+            _it++
+            return _it; 
         }
+
         Iterator operator ++(){
-            Iterator temp; 
-            return temp; 
+            _it++; 
+            return _it; 
         }
+        
         MPair<K, V> operator *(){
-            MPair<K,V> someMap; 
-            return someMap; 
+            return *_it; 
         }
+        
         friend bool operator ==(const Iterator& lhs, const Iterator& rhs){
             return true; 
         }
@@ -47,20 +52,19 @@ public:
 
 //  Iterators
     Iterator begin(){
-        Iterator temp; 
-        return temp;
+        return mmap.begin();
     }
+
     Iterator end(){
-        Iterator temp; 
-        return temp;
+        return mmap.end(); 
     }
 
 //  Capacity
     int size() const{
-        return 0; 
+        return mmap.size(); 
     }
     bool empty() const{
-        return true; 
+        return mmap.empty(); 
     }
 
 //  Element Access
@@ -75,33 +79,37 @@ public:
 
 //  Modifiers
     void insert(const K& k, const V& v){
-
+        MPair<K,V> insertPair(k,v); 
+        mmap.insert(insertPair); 
     }
 
     void erase(const K& key){
-
+        
     }
-    void clear(){
 
+    void clear(){
+        mmap.clear_tree(); 
     }
 
 //  Operations:
     bool contains(const K& key) const{
-        return true; 
+        MPair<K,V> findThis(key,0);
+        return mmap.contains(findThis); 
     }
 
     vector<V> &get(const K& key){
-        vector<V>* someVec = new vector<V>; 
-        return *someVec; 
+        MPair<K,V> getThis(key, 0); 
+        MPair<K,V> found = mmap.get(getThis); 
+        return found.value_list; 
     }
 
     Iterator find(const K& key){
-        Iterator temp; 
-        return temp; 
+        MPair<K,V> findThis(key, 0);
+        return mmap.find(findThis); 
     }
 
     
-    int count(const K& key){
+    int count(const K& key){ //count of what??
         return 0; 
     }
     // I have not writtent hese yet, but we will need them:
@@ -112,24 +120,18 @@ public:
 
     
     Iterator lower_bound(const K& key){
-        Iterator temp; 
-        return temp; 
+        return mmap.lower_bound(); 
     }
 
     Iterator upper_bound(const K& key){
-        Iterator temp; 
-        return temp; 
+        return mmap.upper_bound(); 
     }
-
-    
-
-    //    upper_bound
-    //    equal_range:
 
 
     const V& at(const K& key) const{
-        V* someObj = new V; 
-        return *someObj; 
+        MPair<K,V> findThis(key, 0);
+        const MPair<K,V> found = mmap.get(findThis); 
+        return found.value_list; 
     } 
 
     bool is_valid(){

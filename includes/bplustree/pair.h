@@ -14,19 +14,19 @@ struct Pair{
         return outs; 
     }
     friend bool operator ==(const Pair<K, V>& lhs, const Pair<K, V>& rhs){
-        return true; 
+        return (lhs.key == rhs.key); 
     }
     friend bool operator < (const Pair<K, V>& lhs, const Pair<K, V>& rhs){
-        return true; 
+        return (lhs.key < rhs.key); 
     }
     friend bool operator > (const Pair<K, V>& lhs, const Pair<K, V>& rhs){
-        return true; 
+        return (lhs.key > rhs.key); 
     }
     friend bool operator <= (const Pair<K, V>& lhs, const Pair<K, V>& rhs){
-        return true; 
+        return (lhs.key <= rhs.key); 
     }
     friend Pair<K, V> operator + (const Pair<K, V>& lhs, const Pair<K, V>& rhs){
-        return true; 
+        return rhs; 
     }
 };
 

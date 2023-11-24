@@ -34,19 +34,22 @@ struct MPair{
     }
     
     friend bool operator ==(const MPair<K, V>& lhs, const MPair<K, V>& rhs){
-        return true; 
+        return (lhs.key == rhs.key); 
     }
     friend bool operator < (const MPair<K, V>& lhs, const MPair<K, V>& rhs){
-        return true; 
+        return (lhs.key < rhs.key); 
     }
     friend bool operator <= (const MPair<K, V>& lhs, const MPair<K, V>& rhs){
-        return true; 
+        return (lhs.key <= rhs.key); 
     }
     friend bool operator > (const MPair<K, V>& lhs, const MPair<K, V>& rhs){
-        return true; 
+        return (lhs.key > rhs.key); 
     }
     friend MPair<K, V> operator + (const MPair<K, V>& lhs, const MPair<K, V>& rhs){
-        return true; 
+        for(int i = 0; i < rhs.value_list.size(); i++){
+            lhs.value_list.push_back(rhs.value_list[i]); 
+        }
+        return lhs; 
     }
 };
 
