@@ -22,7 +22,7 @@ public:
         }
 
         Iterator operator ++(int unused){
-            _it++
+            _it++;
             return _it; 
         }
 
@@ -69,12 +69,15 @@ public:
 
 //  Element Access
     const vector<V>& operator[](const K& key) const{
-        vector<V>* someVec = new vector<V>; 
-        return *someVec; 
+        MPair<K,V> getThis(key, 0); 
+        MPair<K,V> found = mmap.get(getThis); 
+        return found.value_list; 
     }
+
     vector<V>& operator[](const K& key){
-         vector<V>* someVec = new vector<V>; 
-        return *someVec; 
+        MPair<K,V> getThis(key, 0); 
+        MPair<K,V> found = mmap.get(getThis); 
+        return found.value_list; 
     }
 
 //  Modifiers

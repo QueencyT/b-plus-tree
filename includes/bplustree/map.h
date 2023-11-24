@@ -70,19 +70,21 @@ public:
 
 //  Element Access
     V& operator[](const K& key){
-        map.get(); 
-        V* someObj = new V; 
-        return *someObj; 
+        Pair<K,V> getThis(key, 0); 
+        Pair<K,V> found = map.get(getThis); 
+        return found.value; 
     }
 
     V& at(const K& key){
         //we want BPlusTree<Pair<K, V>>::Iterator
-        Pair<K,V> foundPair = map.get_existing(key); 
+        Pair<K,V> getThis(key, 0); 
+        Pair<K,V> foundPair = map.get_existing(getThis); 
         return foundPair.value; 
     }
 
     const V& at(const K& key) const{
-        Pair<K,V> foundPair = map.get_existing(key); 
+        Pair<K,V> getThis(key, 0); 
+        Pair<K,V> foundPair = map.get_existing(getThis); 
         return foundPair.value;  
     }
 

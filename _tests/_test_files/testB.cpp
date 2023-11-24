@@ -186,7 +186,7 @@ TEST(TEST_COPY, testCopy){
 }
 
 TEST(TEST_REMOVE, testRemove){
-  EXPECT_EQ(1, test_remove(false));
+  EXPECT_EQ(1, test_remove(true));
 }
 
 TEST(TEST_TRAVERSALS, testTraversal){
@@ -194,11 +194,11 @@ TEST(TEST_TRAVERSALS, testTraversal){
 }
 
 TEST(TEST_MAP, testMapIter){
-  EXPECT_EQ(1, test_map_iter(true)); 
+  EXPECT_EQ(1, test_map_iter(false)); 
 }
 
 TEST(TEST_GET, testGet){
-  EXPECT_EQ(1, test_get(true)); 
+  EXPECT_EQ(1, test_get(false)); 
 }
 
 
