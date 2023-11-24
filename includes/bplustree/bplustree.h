@@ -22,19 +22,24 @@ public:
 
         Iterator operator++(int un_used){//hmm?
             key_ptr++; 
+            Iterator returnIter(it, key_ptr); 
             if(key_ptr == it->data_count){ //next bPlusTree 
                 key_ptr = 0;
+                it = it->next; 
+                Iterator returnIter(it, key_ptr);
             }
-            Iterator returnIter(it->next, key_ptr); 
             return returnIter; 
         }
 
         Iterator operator++(){
             key_ptr++; 
+            Iterator returnIter(it, key_ptr); 
+
             if(key_ptr == it->data_count){ //next bPlusTree 
                 key_ptr = 0;
+                it = it->next; 
+                Iterator returnIter(it->next, key_ptr); 
             }
-            Iterator returnIter(it->next, key_ptr); 
             return returnIter; 
         }
 
@@ -175,28 +180,28 @@ private:
 
 template <typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::begin(){
+    BPlusTree<T>::Iterator returnIter(this, 0); 
     if(is_leaf()){
-        BPlusTree<T>::Iterator returnIter(this, 0); 
         return returnIter; 
     }
-   subset[0]->begin(); //go to left most child
+    else{
+        returnIter = subset[0]->begin(); //go to left most child
+    }
+    return returnIter; 
 }
 
 
 template <typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::end(){
-   /* if(is_leaf()){
-        Iterator returnIter(this, 0); 
-        return returnIter; 
-    }
-   subset[child_count - 1]->end(); //go to right most child*/
    BPlusTree<T>::Iterator nullIter(nullptr, 0); 
    return nullIter; 
 }
 
 template <typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T& key){
-    BPlusTree<T>::Iterator nullIter; 
+BPlusTree<T>::Iterator nullIter; 
+//cout<<"begin: "<<*begin()<<endl; 
+//cout<<"here\n";
    for(BPlusTree<T>::Iterator beg = begin(); beg != end(); beg++){
     if(*beg == key){
         BPlusTree<T>::Iterator foundIter (beg.it, beg.key_ptr); 
@@ -208,36 +213,34 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T& key){
 //return an iterator to this key. NULL if not there.
 
 template <typename T>
-typename BPlusTree<T>::Iterator BPlusTree<T>::lower_bound(const T& key){ //assuming we are trying to find the previous ??? //or curr iter
-    BPlusTree<T>* found = find_ptr(key); 
-    BPlusTree<T>::Iterator nullIter; 
-    if(found){
-        BPlusTree<T>::Iterator foundIter(found); 
-        return foundIter; 
+typename BPlusTree<T>::Iterator BPlusTree<T>::lower_bound(const T& key){ //assuming we are trying to find the previous ???
+    BPlusTree<T>::Iterator found; 
+
+    for(BPlusTree<T>::Iterator iter = begin(); iter != end(); iter++){
+        if(*iter > key || *iter == key){
+            found = iter;  
+            return found; 
+        }
     }
-    return nullIter; 
+    return found; 
 }
 //return first that goes NOT BEFORE
 // key entry or next if does not
 // exist: >= entry
 
 template <typename T>
-typename BPlusTree<T>::Iterator BPlusTree<T>::upper_bound(const T& key){
-    BPlusTree<T>* found = find_ptr(key); 
-    Iterator nullIter(nullptr, 0); 
+typename BPlusTree<T>::Iterator BPlusTree<T>::upper_bound(const T& key){//assuming that this key is in there? prob not
+     BPlusTree<T>::Iterator found; 
 
-    if(found){
-        //int index = first_ge(found->data, data_count, key); 
-        //int nextIndex = index + 1; 
-        BPlusTree<T>::Iterator returnIter(found->next);  
-
-        //if(nextIndex < data_count)
-            //BPlusTree<T>::Iterator returnIter(find_ptr(key)); 
-    
-        return returnIter; 
+    for(BPlusTree<T>::Iterator iter = begin(); iter != end(); iter++){
+        //cout<<"iter: "<<*iter<<endl; 
+        if(*iter > key){//the first time we find something greater
+            found = iter; 
+            return found; 
+        }
     }
-
-    return nullIter; 
+   
+    return end(); 
 }  //return first that goes AFTER key
                                         //exist or not, the next entry  >entry
 
@@ -661,7 +664,7 @@ bool BPlusTree<T>::contains(const T& entry) const{
         return false; //no children and not found 
     }
     else{
-       foundPtr = subset[index]->find_ptr(entry); //go left or right depending on what index
+       foundPtr = subset[index]->contains(entry); //go left or right depending on what index
     }
     return foundPtr;   
 } 
@@ -669,7 +672,7 @@ bool BPlusTree<T>::contains(const T& entry) const{
 //true if entry can be found
 
 template <typename T>
-T& BPlusTree<T>::get(const T& entry){ //must test 
+T& BPlusTree<T>::get(const T& entry){ //must test
     T* found = find_ptr(entry); 
     if(found){//if found
         return *found;    
@@ -683,7 +686,21 @@ T& BPlusTree<T>::get(const T& entry){ //must test
 
 template <typename T>
 const T& BPlusTree<T>::get(const T& entry) const{ //what if not found??
-    T* found = find_ptr(entry); //can't change so no insertion? 
+    int index = first_ge(data, data_count, entry); 
+    T* found; 
+  
+    if(index < data_count && data[index] == entry && is_leaf()){ //go right --> else entry must be kess so we go left =
+        return *(data + index); //no we don't want this 
+    }
+    else if(index < data_count && data[index] == entry){
+       found = &subset[index + 1]->get(entry); 
+    }
+    else if(is_leaf()){
+        return T(); //no children and not found 
+    }
+    else{
+       found = &subset[index]->get(entry); //go left or right depending on what index
+    }
     return *found; 
 }//return a reference to entry
 

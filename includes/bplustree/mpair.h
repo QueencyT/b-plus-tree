@@ -1,6 +1,9 @@
 #ifndef MPAIR_H 
 #define MPAIR_H 
 #include <iostream>
+#include <vector>
+
+using namespace std; 
 
 template <typename K, typename V>
 struct MPair{
@@ -20,7 +23,7 @@ struct MPair{
     }
     MPair(const K& k, const V& v){
         key = k; 
-        value_list = v; 
+        value_list.push_back(v); 
     }
     MPair(const K& k, const vector<V>& vlist){
         key = k; 
@@ -30,6 +33,10 @@ struct MPair{
 
     //You'll need to overlod << for your vector:
     friend ostream& operator <<(ostream& outs, const MPair<K, V>& print_me){
+        outs<<print_me.key<<" : "; 
+        for(int i = 0; i < print_me.value_list.size(); i++){
+            outs<<print_me.value_list[i]<<" "; 
+        }
         return outs; 
     }
     

@@ -13,7 +13,8 @@ public:
     public:
         friend class MMap;
         Iterator(){
-            _it = mmap.begin(); 
+            //_it = mmap.begin(); 
+            _it = nullptr; 
             //dups ok is true for mmap
         }
 
@@ -36,10 +37,10 @@ public:
         }
         
         friend bool operator ==(const Iterator& lhs, const Iterator& rhs){
-            return true; 
+            return (lhs._it == rhs._it); 
         }
         friend bool operator !=(const Iterator& lhs, const Iterator& rhs){
-            return true; 
+            return (lhs._it != rhs._it); 
         }
 
     private:
@@ -69,15 +70,18 @@ public:
 
 //  Element Access
     const vector<V>& operator[](const K& key) const{
-        MPair<K,V> getThis(key, 0); 
-        MPair<K,V> found = mmap.get(getThis); 
-        return found.value_list; 
+        MPair<K,V> getThis(key); 
+        //MPair<K,V> found = 
+        
+        return mmap.get(getThis).value_list; 
+        //return found.value_list; 
     }
 
     vector<V>& operator[](const K& key){
-        MPair<K,V> getThis(key, 0); 
-        MPair<K,V> found = mmap.get(getThis); 
-        return found.value_list; 
+        MPair<K,V> getThis(key); 
+        //MPair<K,V> found = 
+        return mmap.get(getThis).value_list; 
+        //return found.value_list; 
     }
 
 //  Modifiers
@@ -96,18 +100,18 @@ public:
 
 //  Operations:
     bool contains(const K& key) const{
-        MPair<K,V> findThis(key,0);
+        MPair<K,V> findThis(key);
         return mmap.contains(findThis); 
     }
 
     vector<V> &get(const K& key){
-        MPair<K,V> getThis(key, 0); 
+        MPair<K,V> getThis(key); 
         MPair<K,V> found = mmap.get(getThis); 
         return found.value_list; 
     }
 
     Iterator find(const K& key){
-        MPair<K,V> findThis(key, 0);
+        MPair<K,V> findThis(key);
         return mmap.find(findThis); 
     }
 
@@ -123,18 +127,20 @@ public:
 
     
     Iterator lower_bound(const K& key){
-        return mmap.lower_bound(); 
+        MPair<K,V> bound(key);
+        return mmap.lower_bound(bound); 
     }
 
     Iterator upper_bound(const K& key){
-        return mmap.upper_bound(); 
+        MPair<K,V> bound(key);
+        return mmap.upper_bound(bound); 
     }
 
 
     const V& at(const K& key) const{
-        MPair<K,V> findThis(key, 0);
-        const MPair<K,V> found = mmap.get(findThis); 
-        return found.value_list; 
+        MPair<K,V> findThis(key);
+        return mmap.get(findThis).value_list[0]; //idk?? first item of the vector???
+        //return found.value_list; 
     } 
 
     bool is_valid(){

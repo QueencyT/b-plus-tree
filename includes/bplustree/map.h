@@ -13,7 +13,8 @@ public:
     public:
         friend class Map;
         Iterator(){
-            _it = map.begin(); //default the iterator will be begin
+            _it = nullptr;
+            //_it = map.begin(); //default the iterator will be begin
             //BPlusTree<Pair<K, V>::Iterator will be returned by begin 
             //we want BPlusTree<Pair<K, V>>::Iterator
            
@@ -38,7 +39,7 @@ public:
             return (lhs._it == rhs._it); 
         }
         friend bool operator !=(const Iterator& lhs, const Iterator& rhs){
-            return (lhs._it == rhs._it); 
+            return (lhs._it != rhs._it); 
         }
 
     private:
@@ -56,7 +57,7 @@ public:
     }
 
     Iterator end(){
-        Iterator nulliter(nullptr); 
+        Iterator nulliter = map.end(); 
         return nulliter; 
     }
 
@@ -70,20 +71,20 @@ public:
 
 //  Element Access
     V& operator[](const K& key){
-        Pair<K,V> getThis(key, 0); 
-        Pair<K,V> found = map.get(getThis); 
-        return found.value; 
+        Pair<K,V> getThis(key); 
+        return map.get(getThis).value; 
     }
 
     V& at(const K& key){
         //we want BPlusTree<Pair<K, V>>::Iterator
-        Pair<K,V> getThis(key, 0); 
-        Pair<K,V> foundPair = map.get_existing(getThis); 
-        return foundPair.value; 
+        Pair<K,V> getThis(key); 
+        //Pair<K,V> foundPair = 
+        return map.get_existing(getThis).value; 
+        
     }
 
     const V& at(const K& key) const{
-        Pair<K,V> getThis(key, 0); 
+        Pair<K,V> getThis(key); 
         Pair<K,V> foundPair = map.get_existing(getThis); 
         return foundPair.value;  
     }
@@ -96,7 +97,7 @@ public:
         key_count++; 
     }
     void erase(const K& key){
-        Pair<K,V> deleteThis(key,0); 
+        Pair<K,V> deleteThis(key); 
         map.remove(deleteThis); 
         key_count--; 
     }
@@ -113,7 +114,7 @@ public:
 
 //  Operations:
     Iterator find(const K& key){
-        Pair<K,V> findThis(key, 0); 
+        Pair<K,V> findThis(key); 
         return map.find(findThis);
     }
     bool contains(const Pair<K, V>& target) const{
@@ -126,12 +127,14 @@ public:
     }
     
     Iterator lower_bound(const K& key){
-        Iterator mIter = map.lower_bound(key); 
+        Pair<K,V> bound(key);
+        Iterator mIter = map.lower_bound(bound); 
         return mIter; 
     }
 
     Iterator upper_bound(const K& key){
-        Iterator mIter = map.upper_bound(key); 
+        Pair<K,V> bound(key);
+        Iterator mIter = map.upper_bound(bound); 
         return mIter; 
     }
 

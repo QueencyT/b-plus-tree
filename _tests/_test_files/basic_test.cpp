@@ -154,10 +154,11 @@ bool map_test(){
   it = map.upper_bound(42);
   cout << "upper_bound(42): " << *it << endl;
   it = map.upper_bound(150);
-  if (it!=map.end())
-    cout << "upper_bound(150): " << *it << endl;
+
+  if(it!=map.end())
+     cout << "upper_bound(150): " << *it << endl;
   else
-      cout << "upper_bound(150): " <<  "NULL"  << endl;
+    cout << "upper_bound(150): " <<  "NULL"  << endl;
 
   cout << "\n\n--- other functions --------\n\n";
   cout << "map.size():        " << map.size() << endl;

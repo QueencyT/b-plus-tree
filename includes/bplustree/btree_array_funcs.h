@@ -153,8 +153,8 @@ ostream& operator <<(ostream& outs, const vector<T>& list){
 
 template <typename T>
 vector<T>& operator +=(vector<T>& list, const T& addme){//cause what is this for?? 
-    vector<T> someVec; 
-    return someVec; //for now
+    list.push_back(addme); 
+    return list; //for now
 }//list.push_back addme 
 
 #endif 

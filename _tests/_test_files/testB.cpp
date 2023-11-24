@@ -158,9 +158,17 @@ bool test_traversal(bool debug){
   }
 }
 
-bool test_map_iter(bool debug){
+bool test_iter(bool debug){
   if(debug){
-
+    int data[] = {10,20,30,40,50}; 
+    BPlusTree<int> mTree(data,5);
+    BPlusTree<int>::Iterator mIter = mTree.begin(); 
+    cout<<"curr tree struct: "<<endl; 
+    cout<<mTree<<endl; 
+     
+    for(int i = 0; i < 5; i++, mIter++){
+      cout<<"iter: "<<*mIter<<endl; 
+    }
   }
 }
 
@@ -186,15 +194,15 @@ TEST(TEST_COPY, testCopy){
 }
 
 TEST(TEST_REMOVE, testRemove){
-  EXPECT_EQ(1, test_remove(true));
+  EXPECT_EQ(1, test_remove(false));
 }
 
 TEST(TEST_TRAVERSALS, testTraversal){
-  EXPECT_EQ(1, test_traversal(true)); 
+  EXPECT_EQ(1, test_traversal(false)); 
 }
 
 TEST(TEST_MAP, testMapIter){
-  EXPECT_EQ(1, test_map_iter(false)); 
+  EXPECT_EQ(1, test_iter(true)); 
 }
 
 TEST(TEST_GET, testGet){
