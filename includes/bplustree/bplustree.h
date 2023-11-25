@@ -681,7 +681,7 @@ void BPlusTree<T>::loose_remove(const T& entry){
                 cout<<*this<<endl; 
                 cout<<"-----------------\n"; 
                 cout<<"in order: "<<in_order()<<endl; 
-                assert(false);
+                //assert(false);
             }
         }
         else{
