@@ -153,7 +153,7 @@ private:
     }             //true if this is a leaf node
 
     T* find_ptr(const T& entry);         //return a pointer to this key.
-                                         // NULL if not there.
+                                         // NULL if not there. 
 
     //insert element functions
     void loose_insert(const T& entry);   //allows MAXIMUM+1 data elements in
@@ -163,6 +163,7 @@ private:
     //remove element functions:
     void loose_remove(const T& entry);  //allows MINIMUM-1 data elements
                                         //  in the root
+                                        
 
     BPlusTree<T>* fix_shortage(int i);  //fix shortage in child i
     // and return the smallest key in this subtree
@@ -381,18 +382,21 @@ void BPlusTree<T>::insert(const T& entry){
 
 template <typename T>
 BPlusTree<T>* BPlusTree<T>::get_smallest_node(){
+    BPlusTree<T>* returnThis; 
      if(is_leaf()){
         return this; 
     }
 
-    subset[0]->get_smallest_node();  
+    returnThis = subset[0]->get_smallest_node();  
+    return returnThis; 
 }
 
 template <typename T>
 void BPlusTree<T>::get_smallest(T& entry){
     //keep going left 
+    cout<<"path: "<<data[0]<<endl; 
     if(is_leaf()){
-        entry = data[0]; 
+        entry = data[0];
         return; 
     }
 
@@ -406,7 +410,7 @@ void BPlusTree<T>::get_biggest(T& entry){
         entry = data[data_count - 1]; 
         return; 
     }
-     subset[child_count - 1]->get_biggest(entry); 
+    subset[child_count - 1]->get_biggest(entry); 
 }       //entry := rightmost leaf
 
 template <typename T>
@@ -482,12 +486,30 @@ BPlusTree<T>* BPlusTree<T>::merge_with_next_subset(int index){
     //cout<<"before merged: "<<endl; 
     //cout<<*this<<endl;  
     //cout<<"-------------------\n";
+    
     BPlusTree<T>* deleted; 
     BPlusTree<T>* merging = subset[index]; 
-    BPlusTree<T>* right = subset[index + 1]; 
+    BPlusTree<T>* right = subset[index + 1];
+   // cout<<"us: "<<data[0]<<endl; 
+   // cout<<"a: "<<this<<endl; 
+
+    //cout<<"cc: "<<child_count<<endl; 
+   // cout<<"dc: "<<data_count<<endl;  
+   // cout<<"short index: "<<index<<endl;  
+   // cout<<"merging to: "<<merging->data[0]<<endl;
+   // cout<<"right: "<<right->data[0]<<endl; 
+
     merge(merging->data, merging->data_count, right->data, right->data_count); 
     merge(merging->subset, merging->child_count, right->subset, right->child_count);
     delete_item(subset, index+1, child_count, deleted);
+    //cout<<"deleted: "<<deleted->data[0]<<endl; 
+    //cout<<"deleted add: "<<deleted<<endl; 
+    //cout<<"deleted dc: "<<deleted->data_count<<endl; 
+    //cout<<"deleted cc: "<<deleted->child_count<<endl; 
+    if(merging->is_leaf())
+        merging->next = deleted; 
+    deleted->data_count = 0; 
+    deleted->child_count = 0; 
     delete deleted;
     deleted = nullptr;
     
@@ -514,57 +536,54 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
     bool STEAL_RIGHT = (right && right->data_count > MINIMUM), STEAL_LEFT = left && left->data_count > MINIMUM, BEGIN_CASE = (shortIndex == 0); 
 
     if(STEAL_RIGHT){//can steal from right
-        cout<<"steal right\n"; 
-        /*cout<<"before steal from right\n";
+       /*cout<<"steal right\n"; 
+        cout<<"short: "<<shortChild->data[0]<<endl; 
+        cout<<"before steal from right\n";
         cout<<*this<<endl; 
         cout<<"--------------------\n";*/
+        
         transfer_left(shortIndex); 
         returned = shortChild; 
-        //cout<<*this<<endl;
-       // cout<<"--------------------\n";
+        /*cout<<"after steal right\n"; 
+        cout<<*this<<endl;
+        cout<<"--------------------\n";*/
+        
     }
     else if(STEAL_LEFT){//can steal from left
-      //  cout<<"short index: "<<shortIndex<<endl; 
-      cout<<"before steal from left\n";
-      // cout<<*this<<endl; 
-       //cout<<"--------------------\n";
+      /*cout<<"before steal from left\n";
+       cout<<*this<<endl; 
+       cout<<"--------------------\n";*/
         transfer_right(shortIndex); 
         returned = shortChild; 
-        //cout<<"after steal from left\n";
-        //cout<<*this<<endl; 
-        //cout<<"--------------------\n";
+        /*cout<<"after steal from left\n";
+        cout<<*this<<endl; 
+        cout<<"--------------------\n";*/
     }
     else if(BEGIN_CASE){//begin case
         T small; 
-        cout<<"before begin\n";
-        /*cout<<*this<<endl; 
-        cout<<"--------------------\n";
-        */
-        delete_item(data, 0, data_count, deleted); //delete begin
+        /*cout<<"before begin\n";
+        cout<<*this<<endl; 
+        cout<<"--------------------\n";*/
+
+        delete_item(data, shortIndex, data_count, deleted); //delete begin
         if(!shortChild->is_leaf())
             ordered_insert(shortChild->data, shortChild->data_count, deleted); 
         returned = merge_with_next_subset(shortIndex); 
-        //cout<<"returning: "<<returned->data[0]<<endl; 
-        //returned->get_smallest(small); 
-        /*
-        cout<<"after begin\n";
+        /*cout<<"after begin\n";
         cout<<*this<<endl; 
-        cout<<"--------------------\n";
-        */
+        cout<<"--------------------\n";*/
     }
     else{
-       /* cout<<"before other\n";
+       /*cout<<"before other\n";
         cout<<*this<<endl; 
         cout<<"--------------------\n";*/
         delete_item(data, shortIndex - 1, data_count, deleted); //delete last //first less than equal
-        if(!shortChild->is_leaf()) //if we are not leaf, then isnert to short child, else don't 
+       if(!shortChild->is_leaf()) //if we are not leaf, then isnert to short child, else don't 
             ordered_insert(shortChild->data, shortChild->data_count, deleted);
         returned = merge_with_next_subset(shortIndex - 1);
-       /*
-        cout<<"after other\n";
-       cout<<*this<<endl; 
-        cout<<"--------------------\n";
-        */
+        /*cout<<"after other\n";
+        cout<<*this<<endl; 
+        cout<<"--------------------\n";*/
     }
    return returned; 
 }  //fix shortage in child i
@@ -575,25 +594,98 @@ BPlusTree<T>* BPlusTree<T>::fix_shortage(int shortIndex){ //we return what we ju
 template <typename T>
 void BPlusTree<T>::loose_remove(const T& entry){
     int goToIndex = first_ge(data, data_count, entry); 
+    BPlusTree<T>* returned; 
 
-    if(goToIndex < data_count && data[goToIndex] == entry){//found //kee
+    if(goToIndex < data_count && data[goToIndex] == entry){//found 
         T temp;  
         //deleting breadcrumbs first
         if(!is_leaf()){ //of we are not leaf, we need to go to breadcrumbs and remove
             T small;  
-            /*cout<<"going for breadcrumsb\n";*/
             BPlusTree<T>* right = subset[goToIndex + 1]; 
             right->loose_remove(entry); 
-           // cout<<"removing: "<<entry<<"breadcumb\n"; 
            
-            if(!is_leaf() && subset[goToIndex + 1]->data_count < MINIMUM)
-                BPlusTree<T>* returned = fix_shortage(goToIndex + 1);
+            if(!is_leaf() && subset[goToIndex + 1]->data_count < MINIMUM){//cause we can land in a deleted place? 
+                returned = fix_shortage(goToIndex + 1);
+            }
 
-            right->get_smallest(small);
-            cout<<"replacing: "<<data[goToIndex]<<" with "<<small<<endl;  
-            data[goToIndex] = small;
+
+            /*cout<<"ENTRY: "<<entry<<endl; 
+            cout<<"index: "<<goToIndex<<endl; 
+            cout<<"data: "<<data[goToIndex]<<endl; 
+            cout<<"a: "<<this<<endl; 
+
+            cout<<"trying to replace\n";
+            cout<<*this<<endl; 
+            cout<<"-------------\n";*/
+
+            bool replaced = false; 
+
+            if(goToIndex < data_count && data[goToIndex] != entry && !replaced){//find entry. which should be in children
+               // cout<<"search in origin\n"; 
+                for(int i = 0; i < data_count; i++){//search ourselves
+                    if(data[i] == entry){
+                       // cout<<"found in origin\n";
+                        T small; 
+                        right = subset[i + 1]; 
+                        right->get_smallest(small); 
+                       // cout<<"replacing: "<<data[i]<<" with "<<small<<endl;
+                        data[i] = small;
+                        replaced = true; 
+                        break; 
+                    }
+                }
+                
+            }
+            
+            
+            for(int i = 0; i < child_count && !replaced; i++){
+                    for(int n = 0; n < subset[i]->data_count; n++){
+                        if(subset[i]->data[n] == entry){
+                       /* cout<<"i: "<<i<<endl; 
+                        cout<<"found in child\n";
+                        cout<<"data: "<<subset[i]->data[n]<<endl; 
+                        cout<<"data a: "<<subset[i]<<endl; 
+                        //cout<<"dc: "<<subset[i]->data_count<<endl; 
+                       // cout<<"cc: "<<subset[i]->child_count<<endl; 
+                       */
+                        T small; 
+                        right = subset[i]->subset[n + 1]; 
+                        //cout<<"right: "<<right<<endl; 
+                        //cout<<"right: data: "<<right->data[0]<<endl; 
+                        right->get_smallest(small); 
+                        //cout<<"replacing: "<<subset[i]->data[n] <<" with "<<small<<endl;
+                        subset[i]->data[n] = small; 
+                        break; 
+                    }
+                }
+                }
+        
+            if(!replaced && data[goToIndex] == entry && goToIndex < data_count ){
+               // cout<<"found in no change\n";
+                T small; 
+                right = subset[goToIndex + 1]; 
+                right->get_smallest(small); 
+               // cout<<"replacing: "<<data[goToIndex] <<" with "<<small<<endl;
+                data[goToIndex] = small; 
+            }
+                
+    
+            /*cout<<"tree after replace: \n"; 
+            cout<<*this<<endl; 
+            cout<<"---------------------------\n";*/
+
+            
+            if(!is_leaf() && subset[goToIndex + 1] && (subset[goToIndex + 1]->data[0] < data[goToIndex])){
+                cout<<"data: "<<data[goToIndex]<<endl; 
+                cout<<"INVALID TREE\n"; 
+                cout<<*this<<endl; 
+                cout<<"-----------------\n"; 
+                cout<<"in order: "<<in_order()<<endl; 
+                assert(false);
+            }
         }
         else{
+            //cout<<"deleting: "<<data[goToIndex]<<endl; 
             delete_item(data, goToIndex, data_count, temp); 
         }
 
@@ -605,15 +697,28 @@ void BPlusTree<T>::loose_remove(const T& entry){
         subset[goToIndex]->loose_remove(entry);
     }
 
-    if(subset[goToIndex]){
-        //cout<<"short child: "<<subset[goToIndex]->data[0]<<endl; 
-       // cout<<"child: "<<subset[goToIndex]->data_count<<endl;
-    }
-     
-
     if(!is_leaf() && subset[goToIndex]->data_count < MINIMUM){
+        //cout<<"we: "<<data[0]<<endl; 
+        //cout<<"a: "<<this<<endl; 
+       // cout<<"data_count: "<<data_count<<endl; 
+       // cout<<"child_count: "<<child_count<<endl; 
+
+        if(subset[goToIndex + 1]){
+            /*cout<<"right: dat count: "<<subset[goToIndex + 1]->data_count<<endl; 
+            cout<<"right: cc: "<<subset[goToIndex + 1]->child_count<<endl;  
+            cout<<"right: "<<subset[goToIndex + 1]->data[0]<<endl; */
+        }
+
+        if(subset[goToIndex]){
+            /*cout<<"short: "<<subset[goToIndex]->data[0]<<endl; 
+            cout<<"cc: "<<subset[goToIndex]->child_count<<endl; 
+            cout<<"dc: "<<subset[goToIndex]->data_count<<endl; */
+        }
+
+        //cout<<"in_order: "<<in_order()<<endl; 
         fix_shortage(goToIndex); //goToIndex should be short index
     }   
+
 }//allows MINIMUM-1 data elements
                                     //  in the root
 
@@ -737,7 +842,7 @@ void BPlusTree<T>::print_tree(int level, ostream &outs) const{
         if(i!= -1 && !is_leaf())
             subset[i]->print_tree(level + 1, outs); //child will always be one more than data count  
         if(i!= 0){
-            outs<<setw(6 * level)<<"["<<data[i - 1]<<"]"<<"cc: "<<child_count; 
+            outs<<setw(6 * level)<<"["<<data[i - 1]<<"]"<<"dc: "<<data_count<<"cc: "<<child_count; //<<" a: "<<this; 
             //if(next)
                // outs<<"next: "<<next->data[0];  
             outs<<endl; 
@@ -821,6 +926,7 @@ T* BPlusTree<T>::find_ptr(const T& entry){ //find should be fine
     return foundPtr; 
 }
 //return a pointer to this key. // NULL if not there.
+
 
 //update next
 #endif

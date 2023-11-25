@@ -106,7 +106,7 @@ bool test_remove(bool debug){
     BPlusTree<int> mTree; 
     srand(time(0)); 
 
-    for(int i = 0; i < 25; i++){
+    for(int i = 0; i < 100; i++){
       int rando = rand() % 800 + 100; 
       mTree.insert(rando); 
     }
@@ -119,7 +119,7 @@ bool test_remove(bool debug){
       if(mTree.contains(rando)){
         cout<<"REMOVING: "<<rando<<endl; 
         mTree.remove(rando); 
-        cout<<mTree<<endl; 
+        //cout<<mTree<<endl; 
         cout<<"in order: "<<mTree.in_order()<<endl; 
         cout<<"size: "<<mTree.size()<<endl; 
         cout<<"--------------------------\n"; 
@@ -194,7 +194,7 @@ TEST(TEST_COPY, testCopy){
 }
 
 TEST(TEST_REMOVE, testRemove){
-  EXPECT_EQ(1, test_remove(false));
+  EXPECT_EQ(1, test_remove(true));
 }
 
 TEST(TEST_TRAVERSALS, testTraversal){
@@ -202,7 +202,7 @@ TEST(TEST_TRAVERSALS, testTraversal){
 }
 
 TEST(TEST_MAP, testMapIter){
-  EXPECT_EQ(1, test_iter(true)); 
+  EXPECT_EQ(1, test_iter(false)); 
 }
 
 TEST(TEST_GET, testGet){
