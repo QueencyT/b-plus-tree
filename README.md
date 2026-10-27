@@ -1,5 +1,5 @@
 
-# B+ Tree, Map & Multimap
+# B+ Tree - Map & Multimap
 
 ## Overview
 
